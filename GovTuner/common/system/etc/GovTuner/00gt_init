@@ -1,0 +1,48 @@
+#!/system/bin/sh
+# Gov-Tuner Init Launcher
+# Copyright (C) 2016 - 2017 Debuffer and Senthil360 @ XDA-Developers
+#      With help from Paget96, F4uzan and GreekDragon
+#=======================================================================#
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+#  GNU General Public License for more details.
+#  You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#=======================================================================#
+if [ $1 == "magisk" ]; then
+	TEST_PATH="/system/etc/GovTuner/init/gt_test"
+else
+	TEST_PATH="/gt_test"
+fi
+battery
+# You can edit this for your preference
+SLEEP_TIME=60
+busybox=/system/etc/GovTuner/busybox
+$busybox rm /data/system/tuned 2>/dev/null
+$busybox rm /data/system/tweaked 2>/dev/null
+$busybox sleep $SLEEP_TIME
+$busybox mount -o remount,rw /
+$busybox echo "Init.d is Working" > $TEST_PATH
+$busybox mount -o remount,ro /
+if [ -s /data/system/GovTuner/current/profile ]; then
+   PROFILE=$($busybox cat /data/system/GT_profile);
+   if [ "$PROFILE" = "battery" ]; then
+      value=1
+   fi
+   if [ "$PROFILE" = "balanced" ]; then
+      value=2
+   fi
+   if [ "$PROFILE" = "performance" ]; then
+      value=3
+   fi
+   $busybox mount -o remount,rw /data
+   $busybox echo 1 > /data/system/first_launch
+   $busybox date >> /data/system/first_launch
+   if [ "$value" -eq 1 ] || [ "$value" -eq 2 ] || [ "$value" -eq 3 ]; then
+      $busybox sh /system/etc/GovTuner/profiles/GovTuner_hybrid $value &
+   fi
+   $busybox mount -o remount,ro /data
+fi
