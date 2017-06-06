@@ -235,6 +235,7 @@ while [ "$t0" -lt 3 ]; do
         t=0
         while [ "$t" -lt "$ta" ]; do
               if [ -e "${gov[$t0]}/${tuneArr1[$t]}" ]; then
+                 chmod 644 "${gov[$t0]}/${tuneArr1[$t]}"
                  $busybox echo "${tuneArr2[$t]}" > "${gov[$t0]}/${tuneArr1[$t]}"
                  cecho "${tuneArr2[$t]}" "${tuneArr1[$t]}";
               fi
@@ -278,6 +279,7 @@ while [ "$t0" -lt 3 ]; do
         t=0
         while [ "$t" -lt "$ta" ]; do
               if [ -e "${gov[$t0]}/${tuneArr1[$t]}" ]; then
+                 chmod 644 "${gov[$t0]}/${tuneArr1[$t]}"
                  $busybox echo "${tuneArr2[$t]}" > "${gov[$t0]}/${tuneArr1[$t]}"
                  cecho "${tuneArr2[$t]}" "${tuneArr1[$t]}";
               fi
@@ -321,6 +323,7 @@ while [ "$t0" -lt 3 ]; do
         t=0
         while [ "$t" -lt "$ta" ]; do
               if [ -e "${gov[$t0]}/${tuneArr1[$t]}" ]; then
+                 chmod 644 "${gov[$t0]}/${tuneArr1[$t]}"
                  $busybox echo "${tuneArr2[$t]}" > "${gov[$t0]}/${tuneArr1[$t]}"
                  cecho "${tuneArr2[$t]}" "${tuneArr1[$t]}";
               fi
@@ -356,18 +359,20 @@ while [ $q -lt 158 ]; do
       unset w1[$q]; unset w2[$q];
       continue
    fi
-   if [ "${w1[$q]}" = "second_phase_freq" ] || [ "${w1[$q]}" = "freq_down_step" ] || [ "${w1[$q]}" = "freq_down_step_barrier" ] || [ "${w1[$q]}" = "optimal_freq" ] || [ "${w1[$q]}" = "freq_responsiveness" ]  || [ "${w1[$q]}" = "awake_ideal_freq" ] || "${w1[$q]}" = "boost_freq" ] || [ "${w1[$q]}" = "suspend_ideal_freq" ] || [ "${w1[$q]}" = "freq_calc_thresh" ] || [ "${w1[$q]}" = "inter_lofreq" ] || [ "${w1[$q]}" = "staycycles_resetfreq" ] || [ "${w1[$q]}" = "active_floor_freq" ] || [ "${w1[$q]}" = "music_min_freq" ]; then
+   if [ "${w1[$q]}" = "second_phase_freq" ] || [ "${w1[$q]}" = "freq_down_step" ] || [ "${w1[$q]}" = "freq_down_step_barrier" ] || [ "${w1[$q]}" = "optimal_freq" ] || [ "${w1[$q]}" = "freq_responsiveness" ]  || [ "${w1[$q]}" = "awake_ideal_freq" ] || [ "${w1[$q]}" = "boost_freq" ] || [ "${w1[$q]}" = "suspend_ideal_freq" ] || [ "${w1[$q]}" = "freq_calc_thresh" ] || [ "${w1[$q]}" = "inter_lofreq" ] || [ "${w1[$q]}" = "staycycles_resetfreq" ] || [ "${w1[$q]}" = "active_floor_freq" ] || [ "${w1[$q]}" = "music_min_freq" ]; then
       unset w2[$q];
       w2[$q]="$MIN_FREQ_0"
    fi
-   if [ -e "${gov[$ga]}/$w1" ]; then
-      $busybox echo "${$w2[$q]}" > "${gov[$ga]}/${w1[$q]}"
+   if [ -e "${gov[$ga]}/${w1[$q]}" ]; then
+      chmod 644 "${gov[$ga]}/${w1[$q]}"
+      $busybox echo "${w2[$q]}" > "${gov[$ga]}/${w1[$q]}"
       cecho "${w2[$q]}" "${w1[$q]}"
       $busybox sleep 0.1
    fi
    if [ $DC -eq 1 ] && [ $bL -eq 0 ]; then
-      if [ -e ${gov[$gc]}/$w1 ]; then
-         $busybox echo "${$w2[$q]}" > "${gov[$gc]}/${w1[$q]}"
+      if [ -e "${gov[$gc]}/${w1[$q]}" ]; then
+         "${gov[$gc]}/${w1[$q]}"
+         $busybox echo "${w2[$q]}" > "${gov[$gc]}/${w1[$q]}"
          cecho "${w2[$q]}" "${w1[$q]}"
          $busybox sleep 0.1
       fi
@@ -389,12 +394,13 @@ while [ $q -lt 158 ]; do
       unset w1[$q]; unset w2[$q];
       continue
    fi
-   if [ "${w1[$q]}" = "second_phase_freq" ] || [ "${w1[$q]}" = "freq_down_step" ] || [ "${w1[$q]}" = "freq_down_step_barrier" ] || [ "${w1[$q]}" = "optimal_freq" ] || [ "${w1[$q]}" = "freq_responsiveness" ]  || [ "${w1[$q]}" = "awake_ideal_freq" ] || "${w1[$q]}" = "boost_freq" ] || [ "${w1[$q]}" = "suspend_ideal_freq" ] || [ "${w1[$q]}" = "freq_calc_thresh" ] || [ "${w1[$q]}" = "inter_lofreq" ] || [ "${w1[$q]}" = "staycycles_resetfreq" ] || [ "${w1[$q]}" = "active_floor_freq" ] || [ "${w1[$q]}" = "music_min_freq" ]; then
+   if [ "${w1[$q]}" = "second_phase_freq" ] || [ "${w1[$q]}" = "freq_down_step" ] || [ "${w1[$q]}" = "freq_down_step_barrier" ] || [ "${w1[$q]}" = "optimal_freq" ] || [ "${w1[$q]}" = "freq_responsiveness" ]  || [ "${w1[$q]}" = "awake_ideal_freq" ] || [ "${w1[$q]}" = "boost_freq" ] || [ "${w1[$q]}" = "suspend_ideal_freq" ] || [ "${w1[$q]}" = "freq_calc_thresh" ] || [ "${w1[$q]}" = "inter_lofreq" ] || [ "${w1[$q]}" = "staycycles_resetfreq" ] || [ "${w1[$q]}" = "active_floor_freq" ] || [ "${w1[$q]}" = "music_min_freq" ]; then
       unset w2[$q];
       w2[$q]="$MIN_FREQ_0"
    fi
-   if [ -e "${gov[$ga]}/$w1" ]; then
-      $busybox echo "${$w2[$q]}" > "${gov[$ga]}/${w1[$q]}"
+   if [ -e "${gov[$ga]}/${w1[$q]}" ]; then
+      chmod 644 "${gov[$ga]}/${w1[$q]}"
+      $busybox echo "${w2[$q]}" > "${gov[$ga]}/${w1[$q]}"
       cecho "${w2[$q]}" "${w1[$q]}"
       $busybox sleep 0.1
    fi
@@ -415,12 +421,13 @@ while [ $q -lt 158 ]; do
       unset w1[$q]; unset w2[$q];
       continue
    fi
-   if [ "${w1[$q]}" = "second_phase_freq" ] || [ "${w1[$q]}" = "freq_down_step" ] || [ "${w1[$q]}" = "freq_down_step_barrier" ] || [ "${w1[$q]}" = "optimal_freq" ] || [ "${w1[$q]}" = "freq_responsiveness" ]  || [ "${w1[$q]}" = "awake_ideal_freq" ] || "${w1[$q]}" = "boost_freq" ] || [ "${w1[$q]}" = "suspend_ideal_freq" ] || [ "${w1[$q]}" = "freq_calc_thresh" ] || [ "${w1[$q]}" = "inter_lofreq" ] || [ "${w1[$q]}" = "staycycles_resetfreq" ] || [ "${w1[$q]}" = "active_floor_freq" ] || [ "${w1[$q]}" = "music_min_freq" ]; then
+   if [ "${w1[$q]}" = "second_phase_freq" ] || [ "${w1[$q]}" = "freq_down_step" ] || [ "${w1[$q]}" = "freq_down_step_barrier" ] || [ "${w1[$q]}" = "optimal_freq" ] || [ "${w1[$q]}" = "freq_responsiveness" ]  || [ "${w1[$q]}" = "awake_ideal_freq" ] || [ "${w1[$q]}" = "boost_freq" ] || [ "${w1[$q]}" = "suspend_ideal_freq" ] || [ "${w1[$q]}" = "freq_calc_thresh" ] || [ "${w1[$q]}" = "inter_lofreq" ] || [ "${w1[$q]}" = "staycycles_resetfreq" ] || [ "${w1[$q]}" = "active_floor_freq" ] || [ "${w1[$q]}" = "music_min_freq" ]; then
       unset w2[$q];
       w2[$q]="$MIN_FREQ_1"
    fi
-   if [ -e "${gov[$gb]}/$w1" ]; then
-      $busybox echo "${$w2[$q]}" > "${gov[$ga]}/${w1[$q]}"
+   if [ -e "${gov[$gb]}/${w1[$q]}" ]; then
+      chmod 644 "${gov[$gb]}/${w1[$q]}"
+      $busybox echo "${w2[$q]}" > "${gov[$gb]}/${w1[$q]}"
       cecho "${w2[$q]}" "${w1[$q]}"
       $busybox sleep 0.1
    fi
@@ -441,12 +448,13 @@ while [ $q -lt 158 ]; do
       unset w1[$q]; unset w2[$q];
       continue
    fi
-   if [ "${w1[$q]}" = "second_phase_freq" ] || [ "${w1[$q]}" = "freq_down_step" ] || [ "${w1[$q]}" = "freq_down_step_barrier" ] || [ "${w1[$q]}" = "optimal_freq" ] || [ "${w1[$q]}" = "freq_responsiveness" ]  || [ "${w1[$q]}" = "awake_ideal_freq" ] || "${w1[$q]}" = "boost_freq" ] || [ "${w1[$q]}" = "suspend_ideal_freq" ] || [ "${w1[$q]}" = "freq_calc_thresh" ] || [ "${w1[$q]}" = "inter_lofreq" ] || [ "${w1[$q]}" = "staycycles_resetfreq" ] || [ "${w1[$q]}" = "active_floor_freq" ] || [ "${w1[$q]}" = "music_min_freq" ]; then
+   if [ "${w1[$q]}" = "second_phase_freq" ] || [ "${w1[$q]}" = "freq_down_step" ] || [ "${w1[$q]}" = "freq_down_step_barrier" ] || [ "${w1[$q]}" = "optimal_freq" ] || [ "${w1[$q]}" = "freq_responsiveness" ]  || [ "${w1[$q]}" = "awake_ideal_freq" ] || [ "${w1[$q]}" = "boost_freq" ] || [ "${w1[$q]}" = "suspend_ideal_freq" ] || [ "${w1[$q]}" = "freq_calc_thresh" ] || [ "${w1[$q]}" = "inter_lofreq" ] || [ "${w1[$q]}" = "staycycles_resetfreq" ] || [ "${w1[$q]}" = "active_floor_freq" ] || [ "${w1[$q]}" = "music_min_freq" ]; then
       unset w2[$q];
       w2[$q]="$MIN_FREQ_0"
    fi
-   if [ -e "${gov[$gc]}/$w1" ]; then
-      $busybox echo "${$w2[$q]}" > "${gov[$ga]}/${w1[$q]}"
+   if [ -e "${gov[$gc]}/${w1[$q]}" ]; then
+      chmod 644 "${gov[$gc]}/${w1[$q]}"
+      $busybox echo "${w2[$q]}" > "${gov[$gc]}/${w1[$q]}"
       cecho "${w2[$q]}" "${w1[$q]}"
       $busybox sleep 0.1
    fi
