@@ -18,6 +18,7 @@
 # ./build.sh 4.0.1
 
 version=$1
+build=$2
 dir=$(pwd)
 GT_in1="$dir/common/system/etc/GovTuner"
 GT_in2="$dir/common/system/etc/GovTuner/profiles"
@@ -30,18 +31,22 @@ fi
 echo "Building Gov-Tuner v$version"
 echo "----------------------"
 
-# Build and copy uninstaller before doing anything
-echo "Building Uninstaller"
-cd uninstaller; zip -r Uninstall_Gov-Tuner.zip .>/dev/null
-echo "Moving Uninstaller to common/system/etc/GovTuner"
-mv Uninstall_Gov-Tuner.zip ../common/system/etc/GovTuner
-cd ..
+if [ "$build" = "bu" ]; then
+   # Build and copy uninstaller before doing anything
+   echo "Building Uninstaller"
+   cd uninstaller; zip -r Uninstall_Gov-Tuner.zip .>/dev/null
+   echo "Moving Uninstaller to common/system/etc/GovTuner"
+   mv Uninstall_Gov-Tuner.zip ../common/system/etc/GovTuner
+   cd ..
+fi
 
-echo "Using zip to build output"
-echo "Building output zip"
-zip -r output/Gov-Tuner_$version.zip . -x ".git/*" "win/*" "uninstaller/*" "output/*" "magisk/*" "build.*" ".gitignore" "Gov-Tuner_*.zip">/dev/null
-echo "Output created: $dir/output/Gov-Tuner_$version.zip"
-echo ""
+if [ "$build" = "b" ] || [ "$build" = "bu" ]; then
+   echo "Using zip to build output"
+   echo "Building output zip"
+   zip -r output/Gov-Tuner_$version.zip . -x ".git/*" "win/*" "uninstaller/*" "output/*" "magisk/*" "build.*" ".gitignore" "Gov-Tuner_*.zip">/dev/null
+   echo "Output created: $dir/output/Gov-Tuner_$version.zip"
+   echo ""
+fi
 
 echo "Push file to sdcard? (Y/n) : "
   read -r p
