@@ -194,19 +194,13 @@ alt_detect
 
 cecho() {
 	#cecho "value" path/file
-	file=$2; val=$1
-	echo $val > $file 2>/dev/null
-	if [ $? -ne 0 ] || [ "$(cat $file)" != "$val" ]; then
-		echo "$($busybox basename $file): ${R}error${N}" >> $TUNED
-		echo "$($busybox basename $file): ${R}$(cat $file)${N}" >> $TWEAKED
-	else
-		echo "$($busybox basename $file): ${G}optimized${N}" >> $TUNED
-		echo "$($busybox basename $file): ${G}$(cat $file)${N}" >> $TWEAKED
-	fi
-	if [ "$(cat $INTERVAL)" == "0" ]; then
-		echo active > /data/system/test
-	fi
-	unset file; unset val
+	val=$1
+        tunable=$2
+        file1=/data/system/tweaked
+        file2=/data/system/tuned
+        $busybox echo "$tweaked" >> "$file1"
+	$busybox echo "$tunable" >> "$file2"
+	unset tunable; unset val
 }
 
 iper_method () {
