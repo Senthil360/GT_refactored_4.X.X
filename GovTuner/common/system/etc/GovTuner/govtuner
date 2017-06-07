@@ -692,6 +692,11 @@ while true; do
 	if [ "$core_ctl" -eq 0 ]; then
 		$busybox echo -e "${W} g. Change Governor ${N}"
 	fi
+        if [ -s /data/system/iper ]; then
+           IPER=$($busybox cat /data/system/iper)
+        else
+           IPER=1
+        fi
 	if [ "$IPER" -eq 1 ]; then
 		$busybox echo -e "${R} i.${N} ${W}Increase performance${N} ${R}($IPER)${N}"
 	else
@@ -713,7 +718,7 @@ while true; do
 	elif [[ $(cat $INTERVAL 2>/dev/null) && $(cat $INTERVAL) -eq 0 ]]; then
 		INT_SEC=locked
 	else
-		INT_SEC=180
+		INT_SEC=300
 	fi
 	if [[ $(cat $INTERVAL 2>/dev/null) && $(cat $INTERVAL) -ne 0 ]]; then
 		$busybox echo -e "${W} v. Change Execution Interval${N} ${G}($INT_SEC secs)${N}"
@@ -935,9 +940,9 @@ while true; do
 			echo -e "CURRENT: ${G}$IPER${N}"
 			echo -n "[1-4]: "
 			while read IP; do
-				if [ "$IP" == "" ] || [[ -n $(echo $IP | $busybox tr -d '0-9') ]] || [ "$IP" -gt "$LIM" ]; then
+				if [ "$IP" == "" ] || [[ -n $(echo $IP | $busybox tr -d '0-9') ]] || [ "$IP" -gt "4" ]; then
 					$busybox clear; sleep 1
-					$busybox echo "incorrect value! Type a value between 1 and $LIM"
+					$busybox echo "incorrect value! Type a value between 1 and 4"
 					echo -e "CURRENT: ${G}$IPER${N}";echo -n "[1-4]: "
 				else
 					$busybox clear;
