@@ -198,7 +198,7 @@ cecho() {
         tunable=$2
         file1=/data/system/tweaked
         file2=/data/system/tuned
-        $busybox echo "$tweaked" >> "$file1"
+        $busybox echo "$val" >> "$file1"
 	$busybox echo "$tunable" >> "$file2"
 	unset tunable; unset val
 }
