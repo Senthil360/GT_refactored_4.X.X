@@ -711,7 +711,6 @@ while true; do
 			$busybox echo -e "${G} p.${N} ${W}Power efficient ${N}"
 		fi
 	fi
-	$busybox echo -e "${W} t. Tuned Parameters ${N}"
 	$busybox echo -e "${W} w. Tweaked Parameters ${N}"
 	if [[ $(cat $INTERVAL 2>/dev/null) && $(cat $INTERVAL) -ne 0 ]]; then
 		INT_SEC=$(cat $INTERVAL)
@@ -989,24 +988,6 @@ while true; do
 			$busybox echo "$PE" > "/data/system/PE";
 			sleep 3
 			$busybox clear;
-		;;
-
-		t|T)
-			$busybox clear;
-			$busybox echo ""
-			if [ -e "/data/system/tuned" ]; then
-				TUNED="/data/system/tuned"
-				$busybox echo -e "${B} The following parameters are tuned :- ${N}"
-				$busybox echo ""
-				$busybox cat $TUNED
-				$busybox echo $divider
-				$busybox echo Press enter to go back
-				read
-			else
-				$busybox echo "Nothing to show"
-				sleep 2
-			fi
-			$busybox clear
 		;;
 
 		w|W)
