@@ -193,6 +193,18 @@ alt_detect() {
 
 alt_detect
 
+end_proc () {
+   if [ -s /data/system/GT_PID ]; then
+      proc1=$($busybox cat /data/system/GT_PID)
+      proc2=$(ps | $busybox grep "$proc1" | $busybox awk '{print $2}')
+      if [ "$proc1" -eq "$proc2" ]; then
+         kill "$proc1"
+      fi
+   fi
+}
+
+end_proc
+
 cecho() {
 	#cecho "value" path/file
 	val=$1
@@ -543,7 +555,7 @@ if [ "$bL" -eq 1 ] && [ "$DC" -eq 1 ]; then
    $busybox echo " " >> $tweaked
    $busybox echo "Tunables Little/Regular" >> $tweaked
    apply_profile_little
-   $busybox echo " " > $tweaked
+   $busybox echo " " >> $tweaked
    $busybox echo "Tunables Big" >> $tweaked
    apply_profile_big
 fi

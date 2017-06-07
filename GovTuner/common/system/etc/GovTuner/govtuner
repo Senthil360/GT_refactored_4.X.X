@@ -133,7 +133,7 @@ while true; do
 
 	interval_choose() {
 		if [ ! -f $INTERVAL ]; then
-			echo 180 > $INTERVAL
+			echo 300 > $INTERVAL
 		fi
 		clear
 		echo "Current Interval: ${G}$(cat $INTERVAL)${N} secs"
