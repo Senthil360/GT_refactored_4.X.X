@@ -762,7 +762,7 @@ while true; do
 	read -r character
 	case $character in
 		1)
-			sh /system/etc/GovTuner/profiles/GovTuner_hybrid 1
+			$busybox setsid /system/etc/GovTuner/profiles/GovTuner_hybrid 1 &
                         $busybox echo "Activating Battery profile"
 		        $busybox sleep 0.3
 		        $busybox echo ""
@@ -770,7 +770,7 @@ while true; do
 		;;
 
 		2)
-			sh /system/etc/GovTuner/profiles/GovTuner_hybrid 2
+			$busybox setsid /system/etc/GovTuner/profiles/GovTuner_hybrid 2 &
                         $busybox echo "Activating Balanced profile"
 		        $busybox sleep 0.3
 		        $busybox echo ""
@@ -778,7 +778,7 @@ while true; do
 		;;
 
 		3)
-			sh /system/etc/GovTuner/profiles/GovTuner_hybrid 3
+			$busybox setsid /system/etc/GovTuner/profiles/GovTuner_hybrid 3 &
                         $busybox echo "Activating Performance profile"
 		        $busybox sleep 0.3
 		        $busybox echo ""
