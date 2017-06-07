@@ -39,7 +39,8 @@ To build, make sure you're in the Gov-Tuner source folder. Type the following co
 
 ##### Linux and Mac
 
-	./build.sh VERSION
+	"./build.sh VERSION b" for GovTuner zip only
+	"./build.sh VERSION bu" for GovTuner zip and uninstaller zip
 
 ##### Windows
 
