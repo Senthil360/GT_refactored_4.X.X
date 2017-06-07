@@ -213,14 +213,14 @@ iper_method () {
 
 
 reset_splarr () {
-  unset t0; unset TL_1; unset TL_2; unset TL_3; unset TL_4; unset TL_5; unset TL_6; unset TL_7; unset TL_8; unset TL_9; unset tuneArr; unset tunerArr2; unset ta; unset t;
+  unset TL_1; unset TL_2; unset TL_3; unset TL_4; unset TL_5; unset TL_6; unset TL_7; unset TL_8; unset TL_9; unset tuneArr; unset tunerArr2; unset ta; unset t1;
 }
 
 spl_tunables_battery() {
-t0=0
+t0=0; t=0; t1=0
 while [ "$t0" -lt 3 ]; do
         #Target_Loads_Battery                
-        TL_1=$(($MIN_FREQ_$t0 + (${CDF[$t0]} * 1)))
+        TL_1=$(($MIN_FREQ_0 + (${CDF[$t0]} * 1)))
         TL_2=$(($TL_1 + ${CDF[$t0]} + ${CDF[$t0]}))
         TL_3=$(($TL_2 + ${CDF[$t0]} + (${CDF[$t0]} / 2)))
 	TL_4=$(($TL_3 + ${CDF[$t0]}))
@@ -230,29 +230,38 @@ while [ "$t0" -lt 3 ]; do
 	TL_8=$(($TL_7 + ${CDF[$t0]}))
 	TL_9=$(($TL_8 + (${CDF[$t0]} * 3)))
         tuneArr1=("above_hispeed_delay" "go_hispeed_load" "hispeed_freq" "target_loads" "sampling_rate" "up_threshold" "down_differential")
-        tuneArr2=("20000 $TL_2:45000 $TL_4:55000 $TL_6:75000 $TL_7:110000 $TL_8:175000 $TL_9:200000" "$((((${CDF[$t0]} / 10000) * 2) + 75))" "$((($IPER * ((($IPER-1) * ${CDF[$t0]}) + $MIN_FREQ_0))))" "0 $MIN_FREQ_0:50 $TL_1:35 $TL_2:45 $TL_3:52 $TL_4:59 $TL_5:75 $TL_6:90 $TL_7:95 $TL_9:99" "$((73000 - (($IPER-1) * 7000)))" "$((100 - (($IPER*3) - ($IPER/2))))" "$((67 - (($IPER*2) - ($IPER/2))))")
+        tuneArr2=("20000 $TL_2:45000 $TL_4:55000 $TL_6:75000 $TL_7:110000 $TL_8:175000 $TL_9:200000" "$((((${CDF[$t0]} / 10000) * 2) + 75))" "$((($IPER * ((($IPER-1) * ${CDF[$t0]}) + $MIN_FREQ_0))))" "0 $MIN_FREQ_$t0:50 $TL_1:35 $TL_2:45 $TL_3:52 $TL_4:59 $TL_5:75 $TL_6:90 $TL_7:95 $TL_9:99" "$((73000 - (($IPER-1) * 7000)))" "$((100 - (($IPER*3) - ($IPER/2))))" "$((67 - (($IPER*2) - ($IPER/2))))")
         ta="${#tuneArr1[@]}"
-        t=0
         while [ "$t" -lt "$ta" ]; do
-              if [ -e "${gov[$t0]}/${tuneArr1[$t]}" ]; then
-                 chmod 644 "${gov[$t0]}/${tuneArr1[$t]}"
-                 $busybox echo "${tuneArr2[$t]}" > "${gov[$t0]}/${tuneArr1[$t]}"
+              if [ -e "${gov[$t1]}/${tuneArr1[$t]}" ]; then
+                 chmod 644 "${gov[$t1]}/${tuneArr1[$t]}"
+                 $busybox echo "${tuneArr2[$t]}" > "${gov[$t1]}/${tuneArr1[$t]}"
                  cecho "${tuneArr2[$t]}" "${tuneArr1[$t]}";
               fi
          t=$((t+1))
         done
+        unset t;
+        t=0
         if [ "$bL" -eq 1 ] && [ "$t0" -eq 0 ]; then
-           t0=$((t0+1))
            reset_splarr
+           t0=$((t0+2))
+           t1=1
            continue;
         fi
-        if [ "$TC" -eq 1 ] && [ "$t0" -eq 1 ]; then
-           t0=$((t0+1))
+        if [ "$TC" -eq 1 ] && [ "$t0" -eq 2 ]; then
            reset_splarr
+           t0=$((t0-1))
+           t1=2
            continue;
         fi
-        if [ "$t0" -eq 2 ]; then
-           t0=$((t0+1))
+        if [ "$bL" -ne 1 ] || [ "$t0" -eq 1 ]; then
+           unset t0;
+           t0=3
+           reset_splarr
+        fi
+        if [ "$TC" -ne 1 ] && [ "$t0" -eq 2 ]; then
+           unset t0;
+           t0=3
            reset_splarr
         fi
 done
@@ -261,10 +270,10 @@ reset_splarr
 }
 
 spl_tunables_balanced() {
-t0=0
+t0=0; t=0; t1=0
 while [ "$t0" -lt 3 ]; do
         #Target_Loads_Balanced                
-        TL_1=$(($MIN_FREQ_$t0 + (${CDF[$t0]} * 2)))
+        TL_1=$(($MIN_FREQ_0 + (${CDF[$t0]} * 2)))
         TL_2=$(($TL_1 + ${CDF[$t0]} + (${CDF[$t0]} / 2)))
         TL_3=$(($TL_2 + ${CDF[$t0]} + (${CDF[$t0]} / 2)))
 	TL_4=$(($TL_3 + ${CDF[$t0]}))
@@ -276,27 +285,36 @@ while [ "$t0" -lt 3 ]; do
         tuneArr1=("above_hispeed_delay" "go_hispeed_load" "hispeed_freq" "target_loads" "sampling_rate" "up_threshold" "down_differential")
         tuneArr2=("20000 $(((${CDF[$t0]} + $MIN_FREQ_0))):30000 $TL_7:60000 $TL_8:20000" "$((((${CDF[$t0]} / 10000) * 2) + 70))" "$((($IPER * ((($IPER-1) * ${CDF[$t0]}) + $MIN_FREQ_0 + (${CDF[$t0]} * 2)))))" "0 $MIN_FREQ_0:40 $TL_1:30 $TL_2:25 $TL_3:50 $TL_4:60 $TL_5:68 $TL_6:75 $TL_7:82 $TL_8:89" "$((63000 - (($IPER-1) * 7000)))" "$((85 - (($IPER*3) - ($IPER/2))))" "$((50 - (($IPER*2) - ($IPER/2))))")
         ta="${#tuneArr1[@]}"
-        t=0
         while [ "$t" -lt "$ta" ]; do
-              if [ -e "${gov[$t0]}/${tuneArr1[$t]}" ]; then
-                 chmod 644 "${gov[$t0]}/${tuneArr1[$t]}"
-                 $busybox echo "${tuneArr2[$t]}" > "${gov[$t0]}/${tuneArr1[$t]}"
+              if [ -e "${gov[$t1]}/${tuneArr1[$t]}" ]; then
+                 chmod 644 "${gov[$t1]}/${tuneArr1[$t]}"
+                 $busybox echo "${tuneArr2[$t]}" > "${gov[$t1]}/${tuneArr1[$t]}"
                  cecho "${tuneArr2[$t]}" "${tuneArr1[$t]}";
               fi
          t=$((t+1))
         done
+        unset t;
+        t=0
         if [ "$bL" -eq 1 ] && [ "$t0" -eq 0 ]; then
-           t0=$((t0+1))
            reset_splarr
+           t0=$((t0+2))
+           t1=1
            continue;
         fi
-        if [ "$TC" -eq 1 ] && [ "$t0" -eq 1 ]; then
-           t0=$((t0+1))
+        if [ "$TC" -eq 1 ] && [ "$t0" -eq 2 ]; then
            reset_splarr
+           t0=$((t0-1))
+           t1=2
            continue;
         fi
-        if [ "$t0" -eq 2 ]; then
-           t0=$((t0+1))
+        if [ "$bL" -ne 1 ] || [ "$t0" -eq 1 ]; then
+           unset t0;
+           t0=3
+           reset_splarr
+        fi
+        if [ "$TC" -ne 1 ] && [ "$t0" -eq 2 ]; then
+           unset t0;
+           t0=3
            reset_splarr
         fi
 done
@@ -305,10 +323,10 @@ reset_splarr
 }
 
 spl_tunables_performance() {
-t0=0
+t0=0; t=0; t1=0
 while [ "$t0" -lt 3 ]; do
         #Target_Loads_Performance                
-        TL_1=$(($MIN_FREQ_$t0 + (${CDF[$t0]} * 3)))
+        TL_1=$(($MIN_FREQ_0 + (${CDF[$t0]} * 3)))
         TL_2=$(($TL_1 + ${CDF[$t0]}))
         TL_3=$(($TL_2 + ${CDF[$t0]} + (${CDF[$t0]} / 2)))
 	TL_4=$(($TL_3 + ${CDF[$t0]}))
@@ -320,27 +338,36 @@ while [ "$t0" -lt 3 ]; do
         tuneArr1=("above_hispeed_delay" "go_hispeed_load" "hispeed_freq" "target_loads" "sampling_rate" "up_threshold" "down_differential")
         tuneArr2=("20000 $(((2 * (${CDF[$t0]} + $MIN_FREQ_0)))):30000 $TL_7:60000 $TL_8:20000" "$((((${CDF[$t0]} / 10000) * 2) + 70))" "$((($IPER * ((($IPER-1) * ${CDF[$t0]}) + $MIN_FREQ_0 + (${CDF[$t0]} * 4)))))" "0 $MIN_FREQ_0:50 $TL_1:25 $TL_2:35 $TL_3:45 $TL_4:60 $TL_5:65 $TL_6:73 $TL_7:90 $TL_8:93 $TL_9:85" "$((53000 - (($IPER-1) * 7000)))" "$((70 - (($IPER*3) - ($IPER/2))))" "$((30 - (($IPER*2) - ($IPER/2))))")
         ta="${#tuneArr1[@]}"
-        t=0
         while [ "$t" -lt "$ta" ]; do
-              if [ -e "${gov[$t0]}/${tuneArr1[$t]}" ]; then
-                 chmod 644 "${gov[$t0]}/${tuneArr1[$t]}"
-                 $busybox echo "${tuneArr2[$t]}" > "${gov[$t0]}/${tuneArr1[$t]}"
+              if [ -e "${gov[$t1]}/${tuneArr1[$t]}" ]; then
+                 chmod 644 "${gov[$t1]}/${tuneArr1[$t]}"
+                 $busybox echo "${tuneArr2[$t]}" > "${gov[$t1]}/${tuneArr1[$t]}"
                  cecho "${tuneArr2[$t]}" "${tuneArr1[$t]}";
               fi
          t=$((t+1))
         done
+        unset t;
+        t=0
         if [ "$bL" -eq 1 ] && [ "$t0" -eq 0 ]; then
-           t0=$((t0+1))
            reset_splarr
+           t0=$((t0+2))
+           t1=1
            continue;
         fi
-        if [ "$TC" -eq 1 ] && [ "$t0" -eq 1 ]; then
-           t0=$((t0+1))
+        if [ "$TC" -eq 1 ] && [ "$t0" -eq 2 ]; then
            reset_splarr
+           t0=$((t0-1))
+           t1=2
            continue;
         fi
-        if [ "$t0" -eq 2 ]; then
-           t0=$((t0+1))
+        if [ "$bL" -ne 1 ] || [ "$t0" -eq 1 ]; then
+           unset t0;
+           t0=3
+           reset_splarr
+        fi
+        if [ "$TC" -ne 1 ] && [ "$t0" -eq 2 ]; then
+           unset t0;
+           t0=3
            reset_splarr
         fi
 done
