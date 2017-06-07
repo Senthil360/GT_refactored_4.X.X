@@ -903,16 +903,11 @@ while true; do
 
 		u|U)
 			$busybox clear
-			OUTPUT_ID=$($busybox cat /data/system/test);
-			kill $OUTPUT_ID 2>/dev/null
+			GT_PID=$($busybox cat /data/system/GT_PID)
+			kill $GT_PID 2>/dev/null
 			echo "Removing files"
 			$busybox sleep 0.5
 			echo "Killing process"
-			$busybox sleep 0.5
-			if [ -e $PROFILE_DIR/profile ]; then
-				$busybox rm -rf $PROFILE_DIR/profile
-			fi
-			echo 1 > $FIRST_RUN
 			$busybox echo "1" > "/data/system/IPER"
 			$busybox echo "Governor_Tuner Disabled"
 			$busybox sleep 0.5
