@@ -265,7 +265,7 @@ while [ "$t0" -lt 3 ]; do
            reset_splarr
         fi
 done
-unset t0;
+unset t0; unset t;
 reset_splarr
 }
 
@@ -318,7 +318,7 @@ while [ "$t0" -lt 3 ]; do
            reset_splarr
         fi
 done
-unset t0;
+unset t0; unset t;
 reset_splarr
 }
 
@@ -371,7 +371,7 @@ while [ "$t0" -lt 3 ]; do
            reset_splarr
         fi
 done
-unset t0;
+unset t0; unset t;
 reset_splarr
 }                                                
      
@@ -415,8 +415,8 @@ q=0
 while [ $q -lt 158 ]; do
    q=$((q+1));
    field_table_little=/system/etc/GovTuner/profiles/field_table_little
-   w1[$q]=$($busybox tail -n $q $field_table_little | $busybox head -n 1 | $busybox awk '{print $1}' | cut -d '-' -f1)
-   w2[$q]=$($busybox tail -n $q $field_table_little | $busybox head -n 1 | $busybox cut -d '%' -f$r | cut -d '-' -f1)
+   w1[$q]=$($busybox head -n $q $field_table_little | $busybox tail -n 1 | $busybox awk '{print $1}' | cut -d '-' -f1)
+   w2[$q]=$($busybox head -n $q $field_table_little | $busybox tail -n 1 | $busybox cut -d '%' -f$r | cut -d '-' -f1)
    if [ "${w1[$q]}" = "above_hispeed_delay" ] || [ "${w1[$q]}" = "go_hispeed_load" ] || [ "${w1[$q]}" = "hispeed_freq" ] || [ "${w1[$q]}" = "target_loads" ] || [ "${w1[$q]}" = "sampling_rate" ] || [ "${w1[$q]}" = "up_threshold" ] || [ "${w1[$q]}" = "down_differential" ]; then
       unset w1[$q]; unset w2[$q];
       continue
@@ -438,7 +438,7 @@ spl_tunables_$profile
 }
 
 apply_profile_middle () {
-q=1
+q=0
 while [ $q -lt 158 ]; do
    q=$((q+1));
    field_table_middle=/system/etc/GovTuner/profiles/field_table_middle
@@ -465,10 +465,10 @@ spl_tunables_$profile
 }
 
 apply_profile_big () {
-q=1
+q=0
 while [ $q -lt 158 ]; do
    q=$((q+1));
-   field_table_litle=/system/etc/GovTuner/profiles/field_table_big
+   field_table_big=/system/etc/GovTuner/profiles/field_table_big
    w1[$q]=$($busybox head -n $q $field_table_big | $busybox tail -n 1 | $busybox awk '{print $1}' | cut -d '-' -f1)
    w2[$q]=$($busybox head -n $q $field_table_big | $busybox tail -n 1 | $busybox cut -d '%' -f$r | cut -d '-' -f1)
    if [ "${w1[$q]}" = "above_hispeed_delay" ] || [ "${w1[$q]}" = "go_hispeed_load" ] || [ "${w1[$q]}" = "hispeed_freq" ] || [ "${w1[$q]}" = "target_loads" ] || [ "${w1[$q]}" = "sampling_rate" ] || [ "${w1[$q]}" = "up_threshold" ] || [ "${w1[$q]}" = "down_differential" ]; then
@@ -477,7 +477,7 @@ while [ $q -lt 158 ]; do
    fi
    if [ "${w1[$q]}" = "second_phase_freq" ] || [ "${w1[$q]}" = "freq_down_step" ] || [ "${w1[$q]}" = "freq_down_step_barrier" ] || [ "${w1[$q]}" = "optimal_freq" ] || [ "${w1[$q]}" = "freq_responsiveness" ]  || [ "${w1[$q]}" = "awake_ideal_freq" ] || [ "${w1[$q]}" = "boost_freq" ] || [ "${w1[$q]}" = "suspend_ideal_freq" ] || [ "${w1[$q]}" = "freq_calc_thresh" ] || [ "${w1[$q]}" = "inter_lofreq" ] || [ "${w1[$q]}" = "staycycles_resetfreq" ] || [ "${w1[$q]}" = "active_floor_freq" ] || [ "${w1[$q]}" = "music_min_freq" ]; then
       unset w2[$q];
-      w2[$q]="$MIN_FREQ_0"
+      w2[$q]="$MIN_FREQ_2"
    fi
    if [ -e "${gov[$gc]}/${w1[$q]}" ]; then
       chmod 644 "${gov[$gc]}/${w1[$q]}"
