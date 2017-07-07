@@ -25,7 +25,7 @@ core="/system/etc/GovTuner"
 busybox="/system/etc/GovTuner/busybox"
 getprop="/system/bin/getprop"
 init="/system/etc/init.d"
-ver="4.0.3"
+ver="4.1"
 id="$(id)"; id="${id#*=}"; id="${id%%\(*}"; id="${id%% *}"
 INIT_TEST="/gt_test"
 VER=$($busybox awk -F= '/ro.build.version.release/{print $NF}' /system/build.prop)
