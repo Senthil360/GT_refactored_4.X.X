@@ -912,6 +912,7 @@ while true; do
 			$busybox sleep 0.5
 			echo "Killing process"
 			$busybox echo "1" > "/data/system/IPER"
+                        $busubox echo "def" > /data/system/GT_profile
 			$busybox echo "Governor_Tuner Disabled"
 			$busybox sleep 0.5
 			$busybox clear
