@@ -25,7 +25,7 @@ core="/system/etc/GovTuner"
 busybox="/system/etc/GovTuner/busybox"
 getprop="/system/bin/getprop"
 init="/system/etc/init.d"
-ver="4.1 RC_3"
+ver="4.1 RC_4"
 id="$(id)"; id="${id#*=}"; id="${id%%\(*}"; id="${id%% *}"
 INIT_TEST="/gt_test"
 VER=$($busybox awk -F= '/ro.build.version.release/{print $NF}' /system/build.prop)
@@ -373,7 +373,7 @@ while true; do
                                         gov[1]=$cpu/cpufreq/${cur_gov[1]}
 				fi
 			fi
-			if [ "${#gov[@]}" -lt 2 ]; then
+			if [ "${#gov[@]}" -ne 2 ]; then
 				REG=1
 				ga=0; CD=0; DC=0;
 				MAX_FREQ_0=$($busybox cat "$cpu/cpu0/cpufreq/cpuinfo_max_freq" | $busybox cut -d ' ' -f1)
