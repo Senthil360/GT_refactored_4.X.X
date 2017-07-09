@@ -4,6 +4,17 @@
 core_ctl=0
 option=$1
 tweaked="/data/system/tweaked"
+# colors
+G='\e[01;32m'
+R='\e[01;31m'
+N='\e[00;37;40m'
+Y='\e[01;33m'
+B='\e[01;34m'
+V='\e[01;35m'
+Bl='\e[01;30m'
+C='\e[01;36m'
+W='\e[01;37m'
+
 alt_detect() {
 	cpu=/sys/devices/system/cpu
 	i=0
@@ -210,7 +221,7 @@ cecho() {
 	val=$1
         tunable=$2
         file1=/data/system/tweaked
-        $busybox echo "$tunable : $val" >> "$file1"
+        $busybox echo -e "${Y} $tunable ${N}: ${G} $val ${N}" >> "$file1"
 	unset tunable; unset val
 }
 
@@ -228,7 +239,7 @@ reset_splarr () {
 }
 
 spl_tunables_battery() {
-$busybox echo "Little/Regular CPU" > $tweaked
+$busybox echo -e "${B} Little/Regular CPU ${N}" > $tweaked
 t0=0; t=0; t1=0
 while [ "$t0" -lt 3 ]; do
         #Target_Loads_Battery                
@@ -256,14 +267,14 @@ while [ "$t0" -lt 3 ]; do
         t=0
         if [ "$bL" -eq 1 ] && [ "$t0" -eq 0 ]; then
            reset_splarr
-           $busybox echo "Big CPU" >> /data/system/tweaked
+           $busybox echo -e "${B} Big CPU ${N}" >> $tweaked
            t0=$((t0+2))
            t1=1
            continue;
         fi
         if [ "$TC" -eq 1 ] && [ "$t0" -eq 2 ]; then
            reset_splarr
-           $busybox echo "Middle CPU" >> /data/system/tweaked
+           $busybox echo -e "${B} Middle CPU ${N}" >> $tweaked
            t0=$((t0-1))
            t1=2
            continue;
@@ -284,7 +295,7 @@ reset_splarr
 }
 
 spl_tunables_balanced() {
-$busybox echo "Little/Regular CPU" > $tweaked
+$busybox echo -e "${B} Little/Regular CPU ${N}" > $tweaked
 t0=0; t=0; t1=0
 while [ "$t0" -lt 3 ]; do
         #Target_Loads_Balanced                
@@ -312,14 +323,14 @@ while [ "$t0" -lt 3 ]; do
         t=0
         if [ "$bL" -eq 1 ] && [ "$t0" -eq 0 ]; then
            reset_splarr
-           $busybox echo "Big CPU" >> $tweaked
+           $busybox echo -e "${B} Big CPU ${N}" >> $tweaked
            t0=$((t0+2))
            t1=1
            continue;
         fi
         if [ "$TC" -eq 1 ] && [ "$t0" -eq 2 ]; then
            reset_splarr
-           $busybox echo "Middle CPU" >> $tweaked
+           $busybox echo -e "${B} Middle CPU ${N}" >> $tweaked
            t0=$((t0-1))
            t1=2
            continue;
@@ -340,7 +351,7 @@ reset_splarr
 }
 
 spl_tunables_performance() {
-$busybox echo "Little/Regular CPU" > $tweaked
+$busybox echo -e "${B} Little/Regular CPU ${N}" > $tweaked
 t0=0; t=0; t1=0
 while [ "$t0" -lt 3 ]; do
         #Target_Loads_Performance                
@@ -368,14 +379,14 @@ while [ "$t0" -lt 3 ]; do
         t=0
         if [ "$bL" -eq 1 ] && [ "$t0" -eq 0 ]; then
            reset_splarr
-           $busybox echo "Big CPU" >> $tweaked
+           $busybox echo -e "${B} Big CPU ${N}" >> $tweaked
            t0=$((t0+2))
            t1=1
            continue;
         fi
         if [ "$TC" -eq 1 ] && [ "$t0" -eq 2 ]; then
            reset_splarr
-           $busybox echo "Middle CPU" >> $tweaked
+           $busybox echo -e "${B} Middle CPU ${N}" >> $tweaked
            t0=$((t0-1))
            t1=2
            continue;
@@ -534,41 +545,41 @@ iper_method
 if [ "$bL" -eq 0 ] && [ "$REG" -eq 1 ]; then
    spl_tunables_$profile
    $busybox echo " " >> $tweaked
-   $busybox echo "Tunables Little/Regular" >> $tweaked
+   $busybox echo -e "${B}Tunables${N} ${R}Little/Regular${N}" >> $tweaked
    apply_profile_reg
    
 fi
 if [ "$bL" -eq 0 ] && [ "$SC" -eq 1 ]; then
    spl_tunables_$profile
    $busybox echo " " >> $tweaked
-   $busybox echo "Tunables Little/Regular" >> $tweaked
+   $busybox echo -e "${B}Tunables${N} ${R}Little/Regular${N}" >> $tweaked
    apply_profile_reg
 fi
 if [ "$bL" -eq 0 ] && [ "$DC" -eq 1 ]; then
    spl_tunables_$profile
    $busybox echo " " >> $tweaked
-   $busybox echo "Tunables Little/Regular" >> $tweaked
+   $busybox echo -e "${B}Tunables${N} ${R}Little/Regular${N}" >> $tweaked
    apply_profile_reg
 fi
 if [ "$bL" -eq 1 ] && [ "$DC" -eq 1 ]; then
    spl_tunables_$profile
    $busybox echo " " >> $tweaked
-   $busybox echo "Tunables Little/Regular" >> $tweaked
+   $busybox echo -e "${B}Tunables${N} ${R}Little/Regular${N}" >> $tweaked
    apply_profile_little
    $busybox echo " " >> $tweaked
-   $busybox echo "Tunables Big" >> $tweaked
+   $busybox echo -e "${B}Tunables${N} ${R}Big${N}" >> $tweaked
    apply_profile_big
 fi
 if [ "$bL" -eq 1 ] && [ "$TC" -eq 1 ]; then
    spl_tunables_$profile
    $busybox echo " " >> $tweaked
-   $busybox echo "Tunables Little/Regular" >> $tweaked
+   $busybox echo -e "${B}Tunables${N} ${R}Little/Regular${N}" >> $tweaked
    apply_profile_little
    $busybox echo " " >> $tweaked
-   $busybox echo "Tunables Middle" >> $tweaked
+   $busybox echo -e "${B}Tunables${N} ${R}Middle${N}" >> $tweaked
    apply_profile_middle
    $busybox echo " " >> $tweaked
-   $busybox echo "Big" >> $tweaked
+   $busybox echo -e "${B}Tunables${N} ${R}Big${N}" >> $tweaked
    apply_profile_big
 fi
 $busybox sleep 300
