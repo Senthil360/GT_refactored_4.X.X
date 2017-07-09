@@ -215,7 +215,7 @@ toolbox_mount() {
 
 
 ui_print "****************************************"
-ui_print "*          Gov-Tuner v 4.1       *"
+ui_print "*          Gov-Tuner v 4.1_RC-1       *"
 ui_print "****************************************"
 ui_print ""
 ui_print "@Debuffer"
@@ -341,14 +341,16 @@ rm -rf /data/system/IN
 rm -rf /data/system/bigLITTLE
 ui_print "Installing Gov-Tuner..."
 cp -rf $COM/system/etc/GovTuner /system/etc/GovTuner
-chmod 777 /system/etc/GovTuner/
-cp -rf $COM/data/system/GovTuner /data/system/GovTuner
-chmod 777 /data/system/GovTuner
+sleep 1
 cp -f $COM/system/etc/GovTuner/govtuner /system/bin/govtuner
+cp -f $COM/system/etc/GovTuner/00gt_init /system/etc/init.d/00gt_init
+sleep 0.5
+cp -f $COM/system/etc/GovTuner/govtuner_hybrid /system/etc/GovTuner/profiles/GovTuner_hybrid
+chmod 777 /system/etc/GovTuner/profiles/GovTuner_hybrid
 chmod 777 /system/bin/govtuner
 chown 0.2000 /system/bin/govtuner
-cp -f $COM/system/etc/GovTuner/00gt_init /system/etc/init.d/00gt_init
 chmod 777 /system/etc/init.d/00gt_init
+chown 0.2000 /system/etc/init.d/00gt_init
 cp -rf $BIN/* /system/etc/GovTuner/
 chmod 777 /system/etc/GovTuner/busybox
 chown 0.2000 /system/etc/GovTuner/busybox
