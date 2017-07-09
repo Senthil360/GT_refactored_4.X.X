@@ -1,4 +1,4 @@
-- For 4.1
+
 - Rewritten code from scratch
 - Code size reduced by 70%, increased efficiency and better loop controls
 - Values revised for all devices and profiles
