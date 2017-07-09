@@ -692,8 +692,8 @@ while true; do
 	if [ "$core_ctl" -eq 0 ]; then
 		$busybox echo -e "${W} g. Change Governor ${N}"
 	fi
-        if [ -s /data/system/iper ]; then
-           IPER=$($busybox cat /data/system/iper)
+        if [ -s /data/system/IPER ]; then
+           IPER=$($busybox cat /data/system/IPER)
         else
            IPER=1
         fi
