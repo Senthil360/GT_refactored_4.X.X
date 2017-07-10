@@ -207,7 +207,7 @@ alt_detect
 end_proc () {
    if [ -s /data/system/GT_PID ]; then
       proc1=$($busybox cat /data/system/GT_PID)
-      proc2=$(ps | $busybox grep "$proc1" | $busybox tr -s ' ' | $busybox cut -d ' ' -f2)
+      proc2=$(ps | $busybox grep "$proc1" | $busybox head -n 1 | $busybox tr -s ' ' | $busybox cut -d ' ' -f2)
       if [ "$proc1" -eq "$proc2" ]; then
          kill "$proc1"
       fi
