@@ -731,12 +731,12 @@ while true; do
 	fi
 	$busybox echo " e. Exit"
 	$busybox echo $divider
-	if [ -s /data/system/test ]; then
+	if [ -s /data/system/GT_PID ]; then
 		sleep 0.2
-		OUTPUT_ID=$($busybox cat /data/system/test)
-		if ps | grep "$OUTPUT_ID" ; then
+		OUTPUT_ID=$($busybox cat /data/system/GT_PID)
+		if ps | grep "$OUTPUT_ID" | $busybox head -n 1 1>/dev/null; then
 			sleep 0.2
-			echo -e "${W} GovTuner${N}: ${G} ACTIVE ${N}"
+			echo -e "${W} GovTuner${N}: ${G} ACTIVE ${N} ${B}(PID=$OUTPUT_ID)${N}"
 		else
 			echo -e "${W} GovTuner${N}: ${R} INACTIVE ${N} (RE-RUN GovTuner)"
 		fi
