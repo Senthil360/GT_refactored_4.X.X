@@ -253,7 +253,7 @@ while [ "$t0" -lt 3 ]; do
 	TL_8=$(($TL_7 + ${CDF[$t0]}))
 	TL_9=$(($TL_8 + (${CDF[$t0]} * 3)))
         tuneArr1=("above_hispeed_delay" "go_hispeed_load" "hispeed_freq" "target_loads" "sampling_rate" "up_threshold" "down_differential")
-        tuneArr2=("20000 $TL_2:45000 $TL_4:55000 $TL_6:75000 $TL_7:110000 $TL_8:175000 $TL_9:200000" "$((((${CDF[$t0]} / 10000) * 2) + 75))" "$((($IPER * ((($IPER-1) * ${CDF[$t0]}) + $MIN_FREQ_0))))" "0 $MIN_FREQ_$t0:50 $TL_1:35 $TL_2:45 $TL_3:52 $TL_4:59 $TL_5:75 $TL_6:90 $TL_7:95 $TL_9:99" "$((73000 - (($IPER-1) * 7000)))" "$((100 - (($IPER*3) - ($IPER/2))))" "$((67 - (($IPER*2) - ($IPER/2))))")
+        tuneArr2=("20000 $TL_2:45000 $TL_4:55000 $TL_6:75000 $TL_7:110000 $TL_8:175000 $TL_9:200000" "$((((${CDF[$t0]} / 10000) * 2) + 75))" "$((($IPER * ((($IPER-1) * ${CDF[$t0]}) + $MIN_FREQ_0))))" "0 $MIN_FREQ_0:50 $TL_1:35 $TL_2:45 $TL_3:52 $TL_4:59 $TL_5:75 $TL_6:90 $TL_7:95 $TL_9:99" "$((73000 - (($IPER-1) * 7000)))" "$((100 - (($IPER*3) - ($IPER/2))))" "$((67 - (($IPER*2) - ($IPER/2))))")
         ta="${#tuneArr1[@]}"
         while [ "$t" -lt "$ta" ]; do
               if [ -e "${gov[$t1]}/${tuneArr1[$t]}" ]; then
