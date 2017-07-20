@@ -1,16 +1,16 @@
-above_hispeed_delay- %20000 700000:0 1100000:50000 1400000:75000 1700000:100000- %20000- %20000 1900000:50000-
+above_hispeed_delay- %20000 1100000:40000 1500000:20000- %20000 1100000:40000 1500000:20000- %20000 1100000:40000 1500000:20000-
 boost- %0- %0- %0-
 boostpulse_duration- %0- %0- %0-
 go_hispeed_load- %N/A- %N/A- %N/A-
 hispeed_freq- %$((${HSF[2]} + $MIN_FREQ_2))- %$((${HSF[2]} + $MIN_FREQ_2))- %$((${HSF[2]} + $MIN_FREQ_2))-
-max_freq_hysteresis- %0- %0- %0-
-align_windows- %0- %0- %0-
+max_freq_hysteresis- %80000- %80000- %80000-
+align_windows- %1- %1- %1-
 io_is_busy- %1- %1- %1-
-min_sample_time- %50000- %50000- %50000-
+min_sample_time- %60000- %60000- %60000-
 sampling_down_factor- %1- %1- %1-
 target_loads- %0 $MIN_FREQ_2:15 $TL_1:30 $TL_2:42 $TL_3:55 $TL_4:68 $TL_5:80 $TL_6:87 $TL_7:92 $TL_8:97- %0 $MIN_FREQ_2:15 $TL_1:30 $TL_2:40 $TL_3:50 $TL_4:60 $TL_5:70 $TL_6:80 $TL_7:90 $TL_8:95 $TL_9:99- %0 $MIN_FREQ_2:10 $TL_1:20 $TL_2:30 $TL_3:40 $TL_4:45 $TL_5:50 $TL_6:60 $TL_7:70 $TL_8:85 $TL_9:95-
-timer_rate- %20000- %20000- %20000-
-timer_slack- %0- %20000- %0-
+timer_rate- %30000- %30000- %30000-
+timer_slack- %30000- %30000- %30000-
 up_threshold_any_cpu_freq- %0- %0- %0-
 up_threshold_any_cpu_load- %0- %0- %0-
 down_threshold- %95- %80- %40-
@@ -47,7 +47,9 @@ boost_freq- %$MIN_FREQ_2- %$MIN_FREQ_2- %$MIN_FREQ_2-
 debug_mask- %32- %32- %32-
 down_rate- %10000- %10000- %10000-
 ignore_nice- %0- %0- %0-
-input_boost_duration- %0- %0- %0-
+input_boost_enable- %1- %1- %1-
+input_boost_duration- %150- %150- %250-
+input_boost_freq- %700000- %900000- %1200000-
 max_cpu_load- %100- %100- %100-
 min_cpu_load- %5- %5- %5-
 min_sampling_rate- %20000- %20000- %20000-
@@ -65,7 +67,6 @@ inter_hifreq- %1100000- %1100000- %1500000-
 inter_lofreq- %$MIN_FREQ_2- %$MIN_FREQ_2- %$MIN_FREQ_2-
 inter_staycycles- %2- %2- %4-
 staycycles_resetfreq- %$MIN_FREQ_2- %$MIN_FREQ_2- %1100000-
-input_boost_duration- %0- %0- %0-
 sampling_easy_factor- %2- %2- %2-
 sampling_interim_factor- %3- %3- %3-
 ui_sampling_rate- %40000- %50000- %45000-
@@ -75,7 +76,6 @@ up_sample_time- %50000- %40000- %50000-
 active_floor_freq- %$MIN_FREQ_2- %$MIN_FREQ_2- %$MIN_FREQ_2-
 powersave- %1- %1- %0-
 fastlane- %0- %0- %0-
-input_boost_freq- %600000- %600000- %600000-
 low_load_down_threshold- %37- %20- %10-
 afs_threshold1- %20- %25- %20-
 afs_threshold2- %30- %45- %40-

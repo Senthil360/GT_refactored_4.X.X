@@ -1,7 +1,9 @@
 
 - Rewritten code from scratch
+- CPU detection algorithm updated
 - Code size reduced by 70%, increased efficiency and better loop controls
 - Values revised for all devices and profiles
+- GovChanger removed (there are app alternatives)
 - Profile values arranged in tables for easier access and updates
 - Algorithm depended values such as target_loads added to hybrid script
 - Increased optimization and overall efficiency

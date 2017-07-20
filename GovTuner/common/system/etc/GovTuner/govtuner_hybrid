@@ -1,6 +1,6 @@
 #!/system/bin/sh
 #GovTuner 2017 Copyright - Debuffer and Senthil360
-#Hybrid Profile
+#Hybrid Profile coded by Senthil360 (XDA) @ senthilmanikandan360@gmail.com
 core_ctl=0
 option=$1
 tweaked="/data/system/tweaked"
@@ -137,8 +137,8 @@ while [ "$t0" -lt 3 ]; do
 	TL_7=$(($TL_6 + ${CDF[$t0]} + (${CDF[$t0]} / 2)))
 	TL_8=$(($TL_7 + ${CDF[$t0]}))
 	TL_9=$(($TL_8 + (${CDF[$t0]} * 3)))
-        tuneArr1=("above_hispeed_delay" "go_hispeed_load" "hispeed_freq" "target_loads" "sampling_rate" "up_threshold" "down_differential")
-        tuneArr2=("20000 $TL_2:45000 $TL_4:55000 $TL_6:75000 $TL_7:110000 $TL_8:175000 $TL_9:200000" "$((((${CDF[$t0]} / 10000) * 2) + 75))" "$((($IPER * ((($IPER-1) * ${CDF[$t0]}) + ${min_Freq[$t0]}))))" "0 ${min_Freq[$t0]}:50 $TL_1:35 $TL_2:45 $TL_3:52 $TL_4:59 $TL_5:75 $TL_6:90 $TL_7:95 $TL_9:99" "$((73000 - (($IPER-1) * 7000)))" "$((100 - (($IPER*3) - ($IPER/2))))" "$((67 - (($IPER*2) - ($IPER/2))))")
+        tuneArr1=("go_hispeed_load" "hispeed_freq" "target_loads" "sampling_rate" "up_threshold" "down_differential")
+        tuneArr2=("$(((${CDF[$t0]} / 10000)  + 75))" "$((($IPER * ((($IPER-1) * ${CDF[$t0]}) + ${min_Freq[$t0]}))))" "0 ${min_Freq[$t0]}:50 $TL_1:35 $TL_2:45 $TL_3:52 $TL_4:59 $TL_5:75 $TL_6:90 $TL_7:95 $TL_9:99" "$((73000 - (($IPER-1) * 7000)))" "$((100 - (($IPER*3) - ($IPER/2))))" "$((67 - (($IPER*2) - ($IPER/2))))")
         ta="${#tuneArr1[@]}"
         while [ "$t" -lt "$ta" ]; do
               if [ -e "${gov[$t1]}/${tuneArr1[$t]}" ]; then
@@ -205,8 +205,8 @@ while [ "$t0" -lt 3 ]; do
 	TL_7=$(($TL_6 + (${CDF[$t0]} * 2)))
 	TL_8=$(($TL_7 + ${CDF[$t0]}))
 	TL_9=$(($TL_8 + (${CDF[$t0]} * 3)))
-        tuneArr1=("above_hispeed_delay" "go_hispeed_load" "hispeed_freq" "target_loads" "sampling_rate" "up_threshold" "down_differential")
-        tuneArr2=("20000 $(((${CDF[$t0]} + ${min_Freq[$t0]}))):30000 $TL_7:60000 $TL_8:20000" "$((((${CDF[$t0]} / 10000) * 2) + 70))" "$((($IPER * ((($IPER-1) * ${CDF[$t0]}) + ${min_Freq[$t0]} + (${CDF[$t0]} * 2)))))" "0 ${min_Freq[$t0]}:40 $TL_1:30 $TL_2:25 $TL_3:50 $TL_4:60 $TL_5:68 $TL_6:75 $TL_7:82 $TL_8:89" "$((63000 - (($IPER-1) * 7000)))" "$((85 - (($IPER*3) - ($IPER/2))))" "$((50 - (($IPER*2) - ($IPER/2))))")
+        tuneArr1=("go_hispeed_load" "hispeed_freq" "target_loads" "sampling_rate" "up_threshold" "down_differential")
+        tuneArr2=("$(((${CDF[$t0]} / 10000)  + 70))" "$((($IPER * ((($IPER-1) * ${CDF[$t0]}) + ${min_Freq[$t0]} + (${CDF[$t0]} * 2)))))" "40 ${min_Freq[$t0]}:40 $TL_1:30 $TL_2:25 $TL_3:50 $TL_4:60 $TL_5:68 $TL_6:75 $TL_7:82 $TL_8:89" "$((63000 - (($IPER-1) * 7000)))" "$((85 - (($IPER*3) - ($IPER/2))))" "$((50 - (($IPER*2) - ($IPER/2))))")
         ta="${#tuneArr1[@]}"
         while [ "$t" -lt "$ta" ]; do
               if [ -e "${gov[$t1]}/${tuneArr1[$t]}" ]; then
@@ -273,8 +273,8 @@ while [ "$t0" -lt 3 ]; do
 	TL_7=$(($TL_6 + (${CDF[$t0]} * 2)))
 	TL_8=$(($TL_7 + ${CDF[$t0]}))
 	TL_9=$(($TL_8 + (${CDF[$t0]} * 3)))
-        tuneArr1=("above_hispeed_delay" "go_hispeed_load" "hispeed_freq" "target_loads" "sampling_rate" "up_threshold" "down_differential")
-        tuneArr2=("20000 $(((2 * (${CDF[$t0]} + ${min_Freq[$t0]})))):30000 $TL_7:60000 $TL_8:20000" "$((((${CDF[$t0]} / 10000) * 2) + 70))" "$((($IPER * ((($IPER-1) * ${CDF[$t0]}) + ${min_Freq[$t0]} + (${CDF[$t0]} * 4)))))" "0 ${min_Freq[$t0]}:50 $TL_1:25 $TL_2:35 $TL_3:45 $TL_4:60 $TL_5:65 $TL_6:73 $TL_7:90 $TL_8:93 $TL_9:85" "$((53000 - (($IPER-1) * 7000)))" "$((70 - (($IPER*3) - ($IPER/2))))" "$((30 - (($IPER*2) - ($IPER/2))))")
+        tuneArr1=("go_hispeed_load" "hispeed_freq" "target_loads" "sampling_rate" "up_threshold" "down_differential")
+        tuneArr2=("$(((${CDF[$t0]} / 10000)  + 70))" "$((($IPER * ((($IPER-1) * ${CDF[$t0]}) + ${min_Freq[$t0]} + (${CDF[$t0]} * 4)))))" "60 ${min_Freq[$t0]}:50 $TL_1:25 $TL_2:35 $TL_3:45 $TL_4:60 $TL_5:65 $TL_6:73 $TL_7:90 $TL_8:93 $TL_9:85" "$((53000 - (($IPER-1) * 7000)))" "$((70 - (($IPER*3) - ($IPER/2))))" "$((30 - (($IPER*2) - ($IPER/2))))")
         ta="${#tuneArr1[@]}"
         while [ "$t" -lt "$ta" ]; do
               if [ -e "${gov[$t1]}/${tuneArr1[$t]}" ]; then
@@ -334,7 +334,7 @@ while [ $q -lt 158 ]; do
    field_table_reg="/system/etc/GovTuner/profiles/field_table_reg"
    w1[$q]=$($busybox head -n $q $field_table_reg | $busybox tail -n 1 | $busybox cut -d '-' -f1)
    w2[$q]=$($busybox head -n $q $field_table_reg | $busybox tail -n 1 | $busybox cut -d '%' -f$r | cut -d '-' -f1)
-   if [ "${w1[$q]}" = "above_hispeed_delay" ] || [ "${w1[$q]}" = "go_hispeed_load" ] || [ "${w1[$q]}" = "hispeed_freq" ] || [ "${w1[$q]}" = "target_loads" ] || [ "${w1[$q]}" = "sampling_rate" ] || [ "${w1[$q]}" = "up_threshold" ] || [ "${w1[$q]}" = "down_differential" ]; then
+   if [ "${w1[$q]}" = "go_hispeed_load" ] || [ "${w1[$q]}" = "hispeed_freq" ] || [ "${w1[$q]}" = "target_loads" ] || [ "${w1[$q]}" = "sampling_rate" ] || [ "${w1[$q]}" = "up_threshold" ] || [ "${w1[$q]}" = "down_differential" ]; then
       unset w1[$q]; unset w2[$q];
       continue
    fi
@@ -360,7 +360,7 @@ while [ $q -lt 158 ]; do
    field_table_little=/system/etc/GovTuner/profiles/field_table_little
    w1[$q]=$($busybox head -n $q $field_table_little | $busybox tail -n 1 | $busybox cut -d '-' -f1)
    w2[$q]=$($busybox head -n $q $field_table_little | $busybox tail -n 1 | $busybox cut -d '%' -f$r | cut -d '-' -f1)
-   if [ "${w1[$q]}" = "above_hispeed_delay" ] || [ "${w1[$q]}" = "go_hispeed_load" ] || [ "${w1[$q]}" = "hispeed_freq" ] || [ "${w1[$q]}" = "target_loads" ] || [ "${w1[$q]}" = "sampling_rate" ] || [ "${w1[$q]}" = "up_threshold" ] || [ "${w1[$q]}" = "down_differential" ]; then
+   if [ "${w1[$q]}" = "go_hispeed_load" ] || [ "${w1[$q]}" = "hispeed_freq" ] || [ "${w1[$q]}" = "target_loads" ] || [ "${w1[$q]}" = "sampling_rate" ] || [ "${w1[$q]}" = "up_threshold" ] || [ "${w1[$q]}" = "down_differential" ]; then
       unset w1[$q]; unset w2[$q];
       continue
    fi
@@ -386,7 +386,7 @@ while [ $q -lt 158 ]; do
    field_table_middle=/system/etc/GovTuner/profiles/field_table_middle
    w1[$q]=$($busybox head -n $q $field_table_middle | $busybox tail -n 1 | $busybox cut -d '-' -f1)
    w2[$q]=$($busybox head -n $q $field_table_middle | $busybox tail -n 1 | $busybox cut -d '%' -f$r | cut -d '-' -f1)
-   if [ "${w1[$q]}" = "above_hispeed_delay" ] || [ "${w1[$q]}" = "go_hispeed_load" ] || [ "${w1[$q]}" = "hispeed_freq" ] || [ "${w1[$q]}" = "target_loads" ] || [ "${w1[$q]}" = "sampling_rate" ] || [ "${w1[$q]}" = "up_threshold" ] || [ "${w1[$q]}" = "down_differential" ]; then
+   if [ "${w1[$q]}" = "go_hispeed_load" ] || [ "${w1[$q]}" = "hispeed_freq" ] || [ "${w1[$q]}" = "target_loads" ] || [ "${w1[$q]}" = "sampling_rate" ] || [ "${w1[$q]}" = "up_threshold" ] || [ "${w1[$q]}" = "down_differential" ]; then
       unset w1[$q]; unset w2[$q];
       continue
    fi
@@ -412,7 +412,7 @@ while [ $q -lt 158 ]; do
    field_table_big=/system/etc/GovTuner/profiles/field_table_big
    w1[$q]=$($busybox head -n $q $field_table_big | $busybox tail -n 1 | $busybox cut -d '-' -f1)
    w2[$q]=$($busybox head -n $q $field_table_big | $busybox tail -n 1 | $busybox cut -d '%' -f$r | cut -d '-' -f1)
-   if [ "${w1[$q]}" = "above_hispeed_delay" ] || [ "${w1[$q]}" = "go_hispeed_load" ] || [ "${w1[$q]}" = "hispeed_freq" ] || [ "${w1[$q]}" = "target_loads" ] || [ "${w1[$q]}" = "sampling_rate" ] || [ "${w1[$q]}" = "up_threshold" ] || [ "${w1[$q]}" = "down_differential" ]; then
+   if [ "${w1[$q]}" = "go_hispeed_load" ] || [ "${w1[$q]}" = "hispeed_freq" ] || [ "${w1[$q]}" = "target_loads" ] || [ "${w1[$q]}" = "sampling_rate" ] || [ "${w1[$q]}" = "up_threshold" ] || [ "${w1[$q]}" = "down_differential" ]; then
       unset w1[$q]; unset w2[$q];
       continue
    fi

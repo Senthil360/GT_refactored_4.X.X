@@ -1,16 +1,16 @@
-above_hispeed_delay- %20000 $TL_2:45000 $TL_4:55000 $TL_6:75000 $TL_7:110000 $TL_8:175000 $TL_9:200000- %20000 $((${HSF[0]} + $MIN_FREQ_0)):30000 $TL_7:60000 $TL_8:20000- %20000 $TL_2:25000 $TL_3:30000 $TL_4:40000 $TL_5:20000 $TL_7:30000 $TL_8:50000-
+above_hispeed_delay- %0- %0- %0-
 boost- %0- %0- %0-
 boostpulse_duration- %0- %0- %0-
 go_hispeed_load- %N/A- %N/A- %N/A-
 hispeed_freq- %$((${HSF[0]} + $MIN_FREQ_0))- %N/A- %$((${HSF[0]} + $MIN_FREQ_0))-
-max_freq_hysteresis- %0- %0- %0-
+max_freq_hysteresis- %80000- %80000- %80000-
 align_windows- %0- %0- %0-
 io_is_busy- %1- %1- %1-
-min_sample_time- %50000- %50000- %50000-
+min_sample_time- %60000- %30000- %60000-
 sampling_down_factor- %1- %1- %1-
 target_loads- %0 $MIN_FREQ_0:50 $TL_1:35 $TL_2:45 $TL_3:52 $TL_4:59 $TL_5:75 $TL_6:90 $TL_7:95 $TL_9:99- %N/A- %0 $MIN_FREQ_0:50 $TL_1:25 $TL_2:35 $TL_3:45 $TL_4:60 $TL_5:65 $TL_6:73 $TL_7:90 $TL_8:93 $TL_9:85-
 timer_rate- %20000- %20000- %20000-
-timer_slack- %0- %20000- %0-
+timer_slack- %30000- %30000- %30000-
 up_threshold_any_cpu_freq- %0- %0- %0-
 up_threshold_any_cpu_load- %0- %0- %0-
 down_threshold- %$DTH- %$DTH- %$DTH-
@@ -65,7 +65,9 @@ inter_hifreq- %1100000- %$MIN_FREQ_0- %1500000-
 inter_lofreq- %$MIN_FREQ_0- %2- %$MIN_FREQ_0-
 inter_staycycles- %2- %$MIN_FREQ_0- %4-
 staycycles_resetfreq- %$MIN_FREQ_0- %0- %1100000-
-input_boost_duration- %0- %2- %0-
+input_boost_enable- %1- %1- %1-
+input_boost_duration- %150- %150- %250-
+input_boost_freq- %700000- %900000- %1200000-
 sampling_easy_factor- %2- %3- %2-
 sampling_interim_factor- %3- %50000- %3-
 ui_sampling_rate- %40000- %40- %45000-
@@ -75,7 +77,6 @@ up_sample_time- %50000- %$MIN_FREQ_0- %50000-
 active_floor_freq- %$MIN_FREQ_0- %1- %$MIN_FREQ_0-
 powersave- %1- %0- %0-
 fastlane- %0- %600000- %0-
-input_boost_freq- %600000- %20- %600000-
 low_load_down_threshold- %37- %0- %10-
 afs_threshold1- %20- %45- %20-
 afs_threshold2- %30- %57- %40-
