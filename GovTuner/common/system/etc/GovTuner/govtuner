@@ -83,9 +83,6 @@ while true; do
 	done
 
 	interval_choose() {
-		if [ ! -f $INTERVAL ]; then
-			echo 300 > $INTERVAL
-		fi
 		clear
 		echo "Current Interval: ${G}$(cat $INTERVAL)${N} secs"
 		echo $divider
@@ -95,6 +92,7 @@ while true; do
 		echo " 4 - ${W}3 mins / 180 secs${N}"
 		echo " 5 - Custom"
 		echo " 6 - ${R}Locked${N}"
+                echo " 7 - ${R}Disable_loop${N}"
 		echo " 0 - Back"
 		echo $divider
 		echo -n -e "[Choice]: "
@@ -153,6 +151,14 @@ while true; do
 			6)
 				echo "Locked loop"
 				echo 0 > $INTERVAL
+				sleep 2
+				clear
+				return
+			;;
+                        7)
+				echo "Disable loop execution"
+				echo NO > $INTERVAL
+                                rm -f $INTERVAL 2>/dev/null
 				sleep 2
 				clear
 				return
@@ -263,7 +269,7 @@ while true; do
 	if [ "$core_ctl" -eq 0 ]; then
 		if [ "$ROOT" -eq 0 ]; then
 			$busybox clear
-			$busybox echo -e "Check number core: ${G}OK ($CORE)${N}"
+			$busybox echo -e "Check number core: ${G}OK ($(($CORE+1)))${N}"
 			$busybox echo -e "Check regular and small clusters: ${G}OK (CD$FREQS)${N}"
 			if [ "$FREQS" -ne 1 ]; then
 			   $busybox echo -e "Check number clusters: ${G}OK ($FREQS)${N}"
@@ -501,7 +507,7 @@ while true; do
 	elif [[ $(cat $INTERVAL 2>/dev/null) && $(cat $INTERVAL) -eq 0 ]]; then
 		INT_SEC=locked
 	else
-		INT_SEC=300
+		INT_SEC=DISABLED
 	fi
 	if [[ $(cat $INTERVAL 2>/dev/null) && $(cat $INTERVAL) -ne 0 ]]; then
 		$busybox echo -e "${W} v. Change Execution Interval${N} ${G}($INT_SEC secs)${N}"

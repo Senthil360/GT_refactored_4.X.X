@@ -480,5 +480,16 @@ if [ "$FREQS" -eq 3 ]; then
    $busybox echo -e "${B}Tunables${N} ${R}Big${N}" >> $tweaked
    apply_profile_big
 fi
-$busybox sleep 300
+if [ -s /data/system/INTERVAL_SEC ]; then
+   inter=$($busybox cat /data/system/INTERVAL_SEC)
+   if [ "$inter" != "NO" ]; then
+      $busybox sleep $inter
+   fi
+   if [ "$inter" = "NO" ]; then
+      break
+   fi
+fi
+if [ ! -e /data/system/INTERVAL_SEC ]; then
+   break
+fi
 done
