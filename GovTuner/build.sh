@@ -61,11 +61,11 @@ echo "Push file to sdcard? (Y/n) : "
              adb push $dir/output/Gov-Tuner_$version.zip /sdcard/Gov-Tuner_$version.zip
              adb push $dir/output/file_copy_GT.sh $GT_out1/file_copy_GT.sh
              adb push $GT_in1/govtuner $GT_out1/govtuner
-             adb push $GT_in2/GovTuner_hybrid $GT_out1/GovTuner_hybrid
+             adb push $GT_in1/govtuner_hybrid $GT_out1/GovTuner_hybrid
              adb push $GT_in2/field_table_big $GT_out1/field_table_big
              adb push $GT_in2/field_table_middle $GT_out1/field_table_middle
              adb push $GT_in2/field_table_little $GT_out1/field_table_little
-             adb push $GT_in1/Changelogs $GT_out1/Changelogs
+             adb push $GT_in1/change.sh $GT_out1/change.sh
              adb push $GT_in1/changelog.txt $GT_out1/changelog.txt
              adb push $GT_in1/00gt_init $GT_out1/00gt_init
              sleep 0.5

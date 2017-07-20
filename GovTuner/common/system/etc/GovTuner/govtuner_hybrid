@@ -15,194 +15,79 @@ Bl='\e[01;30m'
 C='\e[01;36m'
 W='\e[01;37m'
 
-alt_detect() {
-	cpu=/sys/devices/system/cpu
-	i=0
-	while [ -d "/sys/devices/system/cpu/cpu$i" ]; do
-		i=$(($i + 1))
-		CORE=$i
-	done
-	c=0
-	for z in $cpu/cpu*; do
-		if [ -f $z/cpufreq/scaling_governor ] && [ ! -L $z/cpufreq/scaling_governor ] && [ ! -L $z/cpufreq ]; then
-			cur_gov[$c]=$(cat $z/cpufreq/scaling_governor)
-			gov[$c]=$z/cpufreq/${cur_gov[$c]}
-			gov_r[$c]=$cpu/cpufreq/${cur_gov[$c]}
-			change[$c]=$z/cpufreq/scaling_governor
-			gov_avail[$c]=$z/cpufreq/scaling_available_governors
-			freq_u[$c]=$z/cpufreq/cpuinfo_max_freq
-			freq_l[$c]=$z/cpufreq/cpuinfo_min_freq
-			c=$((c+1))
-			$busybox sleep 0.5
-		fi
-	done
-	m=0
-	while [ "$m" -lt "${#gov[@]}" ]; do
-		if [ -d "${gov[$m]}" ]; then
-			#Cluster_Device
-			if [ "${#gov[@]}" -eq 1 ]; then
-				SC=1
-				ga=0;
-                                sm1=$($busybox cat "${freq_u[0]}" | $busybox cut -d ' ' -f1)
-                                gd1=$($busybox cat "${freq_l[0]}" | $busybox cut -d ' ' -f1)
-                                MAX_FREQ_0="$sm1"
-			        MIN_FREQ_0="$gd1"
-				DEVICE=SINGLE_CLUSTER
-				SC=1; CD=1; bL=0;
-                                CDF[0]=$(((($MAX_FREQ_0 - $MIN_FREQ_0) / 120000) * 10000))
-			fi
-			if [ "${#gov[@]}" -eq 2 ]; then
-				DC=1
-				sm1=$($busybox cat "${freq_u[0]}" | $busybox cut -d ' ' -f1)
-				sm2=$($busybox cat "${freq_u[1]}" | $busybox cut -d ' ' -f1)
-				gd1=$($busybox cat "${freq_l[0]}" | $busybox cut -d ' ' -f1)
-				gd2=$($busybox cat "${freq_l[1]}" | $busybox cut -d ' ' -f1)
-				if [ "$sm1" -lt "$sm2" ]; then
-					ga=0; gc=1;
-					MAX_FREQ_0="$sm1"
-					MIN_FREQ_0="$gd1"
-					MAX_FREQ_2="$sm2"
-					MIN_FREQ_2="$gd2"
-					DEVICE=DUAL_CLUSTER
-					bL=1; DC=1; CD=1;
-                                        CDF[0]=$(((($MAX_FREQ_0 - $MIN_FREQ_0) / 120000) * 10000))
-		                        CDF[2]=$(((($MAX_FREQ_2 - $MIN_FREQ_2) / 120000) * 10000))
-				fi
-				if [ "$sm2" -lt "$sm1" ]; then
-					ga=1; gc=0;
-					MAX_FREQ_0="$sm2"
-					MIN_FREQ_0="$gd2"
-					MAX_FREQ_2="$sm1"
-					MIN_FREQ_2="$gd1"
-					DEVICE=DUAL_CLUSTER_INVERTED
-					bL=1; DC=1; CD=1;
-                                        CDF[0]=$(((($MAX_FREQ_0 - $MIN_FREQ_0) / 120000) * 10000))
-		                        CDF[2]=$(((($MAX_FREQ_2 - $MIN_FREQ_2) / 120000) * 10000))
-				fi
-                                if [ "$sm1" -eq "$sm2" ]; then
-					ga=0; gc=1;
-					MAX_FREQ_0="$sm1"
-					MIN_FREQ_0="$gd1"
-					MAX_FREQ_2="$sm2"
-					MIN_FREQ_2="$gd2"
-					DEVICE=DUAL_CLUSTER
-					bL=0; DC=1; CD=1;
-                                        CDF[0]=$(((($MAX_FREQ_0 - $MIN_FREQ_0) / 120000) * 10000))
-		                        CDF[2]=$(((($MAX_FREQ_2 - $MIN_FREQ_2) / 120000) * 10000))
-				fi
-			fi
-			if [ "${#gov[@]}" -eq 3 ]; then
-				TC=1
-				sm1=$($busybox cat "${freq_u[0]}" | $busybox cut -d ' ' -f1)
-				sm2=$($busybox cat "${freq_u[1]}" | $busybox cut -d ' ' -f1)
-				sm3=$($busybox cat "${freq_u[2]}" | $busybox cut -d ' ' -f1)
-				gd1=$($busybox cat "${freq_l[0]}" | $busybox cut -d ' ' -f1)
-				gd2=$($busybox cat "${freq_l[1]}" | $busybox cut -d ' ' -f1)
-				gd3=$($busybox cat "${freq_l[2]}" | $busybox cut -d ' ' -f1)
-				if [ "$sm1" -lt "$sm2" ] && [ "$sm2" -lt "$sm3" ]; then
-					ga=0; gb=1; gc=2;
-					MAX_FREQ_0="$sm1"
-					MIN_FREQ_0="$gd1"
-					MAX_FREQ_1="$sm2"
-					MIN_FREQ_1="$gd2"
-					MAX_FREQ_2="$sm3"
-					MIN_FREQ_2="$gd3"
-					DEVICE=TRIPLE_CLUSTER
-					bL=1; TC=1; CD=1;
-                                        CDF[0]=$(((($MAX_FREQ_0 - $MIN_FREQ_0) / 120000) * 10000))
-		                        CDF[1]=$(((($MAX_FREQ_1 - $MIN_FREQ_1) / 120000) * 10000))
-		                        CDF[2]=$(((($MAX_FREQ_2 - $MIN_FREQ_2) / 120000) * 10000))
-				fi
-				if [ "$sm2" -lt "$sm3" ] && [ "$sm3" -lt "$sm1" ]; then
-					ga=2; gb=0; gc=1;
-					MAX_FREQ_0="$sm2"
-					MIN_FREQ_0="$gd2"
-					MAX_FREQ_1="$sm3"
-					MIN_FREQ_1="$gd3"
-					MAX_FREQ_2="$sm1"
-					MIN_FREQ_2="$gd1"
-					DEVICE=TRIPLE_CLUSTER_SCRAMBLED
-					bL=1; TC=1; CD=1;
-                                        CDF[0]=$(((($MAX_FREQ_0 - $MIN_FREQ_0) / 120000) * 10000))
-		                        CDF[1]=$(((($MAX_FREQ_1 - $MIN_FREQ_1) / 120000) * 10000))
-		                        CDF[2]=$(((($MAX_FREQ_2 - $MIN_FREQ_2) / 120000) * 10000))
-				fi
-				if [ "$sm3" -lt "$sm1" ] && [ "$sm1" -lt "$sm2" ]; then
-					ga=1; gb=2; gc=0;
-					MAX_FREQ_0="$sm3"
-					MIN_FREQ_0="$gd3"
-					MAX_FREQ_1="$sm1"
-					MIN_FREQ_1="$gd1"
-					MAX_FREQ_2="$sm2"
-					MIN_FREQ_2="$gd2"
-					DEVICE=TRIPLE_CLUSTER_INVERTED
-					bL=1; TC=1; CD=1;
-                                        CDF[0]=$(((($MAX_FREQ_0 - $MIN_FREQ_0) / 120000) * 10000))
-		                        CDF[1]=$(((($MAX_FREQ_1 - $MIN_FREQ_1) / 120000) * 10000))
-		                        CDF[2]=$(((($MAX_FREQ_2 - $MIN_FREQ_2) / 120000) * 10000))
-				fi
-			fi
-		fi
-		if [ -d "${gov_r[0]}" ] || [ -d "${gov_r[1]}" ]; then
-			if [ "${#gov[@]}" -eq 2 ]; then
-				sm1=$($busybox cat "${freq_u[0]}" | $busybox cut -d ' ' -f1)
-				sm2=$($busybox cat "${freq_u[1]}" | $busybox cut -d ' ' -f1)
-				gd1=$($busybox cat "${freq_l[0]}" | $busybox cut -d ' ' -f1)
-				gd2=$($busybox cat "${freq_l[1]}" | $busybox cut -d ' ' -f1)
-				if [ "$sm1" -lt "$sm2" ] && [ "$sm1" -ne 0 ]; then
-					ga=0; gc=1;
-					MAX_FREQ_0="$sm1"
-					MIN_FREQ_0="$gd1"
-					MAX_FREQ_2="$sm2"
-					MIN_FREQ_2="$gd2"
-					DEVICE=DUAL_CLUSTER
-					bL=1; DC=1; CD=0;
-                                        CDF[0]=$(((($MAX_FREQ_0 - $MIN_FREQ_0) / 120000) * 10000))
-		                        CDF[2]=$(((($MAX_FREQ_2 - $MIN_FREQ_2) / 120000) * 10000))
-				fi
-				if [ "$sm2" -lt "$sm1" ] && [ "$sm2" -ne 0 ]; then
-					ga=1; gc=0;
-					MAX_FREQ_0="$sm2"
-					MIN_FREQ_0="$gd2"
-					MAX_FREQ_2="$sm1"
-					MIN_FREQ_2="$gd1"
-					DEVICE=DUAL_CLUSTER_INVERTED
-					bL=1; DC=1; CD=0;
-                                        CDF[0]=$(((($MAX_FREQ_0 - $MIN_FREQ_0) / 120000) * 10000))
-		                        CDF[2]=$(((($MAX_FREQ_2 - $MIN_FREQ_2) / 120000) * 10000))
-				fi
-				if [ "$sm2" -eq "$sm1" ]; then
-					REG=1
-					ga=0; gc=1; CD=0; DC=1; bL=0;
-					MAX_FREQ_0=$($busybox cat "$cpu/cpu0/cpufreq/cpuinfo_max_freq" | $busybox cut -d ' ' -f1)
-					MIN_FREQ_0=$($busybox cat "$cpu/cpu0/cpufreq/cpuinfo_min_freq" | $busybox cut -d ' ' -f1)
-					DEVICE=REGULAR
-					unset gov[0];
-					unset gov[1];
-					gov[0]=$cpu/cpufreq/${cur_gov[0]}
-                                        gov[1]=$cpu/cpufreq/${cur_gov[1]}
-                                        CDF[0]=$(((($MAX_FREQ_0 - $MIN_FREQ_0) / 120000) * 10000))
-				fi
-			fi
-			if [ "${#gov[@]}" -lt 2 ]; then
-				REG=1
-				ga=0; CD=0; DC=0;
-				MAX_FREQ_0=$($busybox cat "$cpu/cpu0/cpufreq/cpuinfo_max_freq" | $busybox cut -d ' ' -f1)
-				MIN_FREQ_0=$($busybox cat "$cpu/cpu0/cpufreq/cpuinfo_min_freq" | $busybox cut -d ' ' -f1)
-                                sm1="$MAX_FREQ_0"
-                                gd1="$MIN_FREQ_0"
-				DEVICE=REGULAR
-				unset gov[0];
-				unset gov[1];
-				gov[0]=$cpu/cpufreq/${cur_gov[0]}
-                                CDF[0]=$(((($MAX_FREQ_0 - $MIN_FREQ_0) / 120000) * 10000))
-			fi
-		fi
-		m=$(($m+1))
-	done
-}
 
-alt_detect
+main_detect() {
+        DIR="/sys/devices/system/cpu/*"
+        checkA=$($busybox find $DIR -name cpuinfo_max_freq)
+        checkB=$($busybox find $DIR -name cpuinfo_min_freq)
+        total=$($busybox find $DIR -name cpuinfo_max_freq | $busybox wc -l)
+        A=0; A1=1; C=0; D=1
+        while [ "$A" -lt "$total" ]; do
+            check1[$A]=$($busybox echo "$checkA" | $busybox head -n $A1 | $busybox tail -n 1)
+            check2[$A]=$($busybox echo "$checkB" | $busybox head -n $A1 | $busybox tail -n 1)
+            check3[$A]=$($busybox realpath "${check1[$A]}")
+            check4[$A]=$($busybox realpath "${check2[$A]}")
+            path[$A]=$($busybox echo "${check1[$A]}" | $busybox rev | $busybox cut -c 17- | $busybox rev)
+          if [ "${check1[$A]}" = "${check3[$A]}" ] && [ "${check2[$A]}" = "${check4[$A]}" ]; then
+             sca_gov[$C]=$($busybox cat "${path[$A]}/scaling_governor")
+             checkC=$($busybox find $DIR -name "${sca_gov[$C]}")
+             gov[$C]=$($busybox echo "$checkC" | $busybox head -n $D | $busybox tail -n 1)
+             max_Freq[$C]=$($busybox cat "${check1[$A]}")
+             min_Freq[$C]=$($busybox cat "${check2[$A]}")
+             CDF[$C]=$(((${max_Freq[$C]} - ${min_Freq[$C]}) / 10 ))
+             if [ "${CDF[$C]}" -lt 0 ]; then
+                CDF[$C]=$(( -1 * ${CDF[$C]} ))
+             fi
+             if [ "${gov[$C]}" = "/sys/devices/system/cpu/cpufreq/${sca_gov[$C]}" ]; then
+                ga=0
+                break
+             fi
+             $busybox sleep 0.2
+             C=$((C+1))
+             D=$((D+1))
+          fi
+         A=$((A+1))
+         A1=$((A1+1))
+       done
+       FREQS="${#CDF[@]}"
+       if [ "$FREQS" -eq 3 ]; then
+          unset smArr; unset m;
+          smArr=($(for i in "${CDF[@]}"; do $busybox echo "$i"; done | $busybox sort -n))
+          m=0
+          while [ "$m" -lt 3 ]; do
+             if [ "${smArr[0]}" -eq "${CDF[$m]}" ]; then
+                ga="$m"
+             fi
+             if [ "${smArr[1]}" -eq "${CDF[$m]}" ]; then
+                gb="$m"
+             fi
+             if [ "${smArr[2]}" -eq "${CDF[$m]}" ]; then
+                gc="$m"
+             fi
+            m="$((m+1))"
+          done
+       fi   
+       if [ "$FREQS" -eq 2 ]; then
+          unset smArr; unset m;
+          smArr=($(for i in "${CDF[@]}"; do $busybox echo "$i"; done | $busybox sort -n))
+          m=0
+          while [ "$m" -lt 2 ]; do
+             if [ "${smArr[0]}" -eq "${CDF[$m]}" ]; then
+                ga="$m"
+             fi
+             if [ "${smArr[1]}" -eq "${CDF[$m]}" ]; then
+                gc="$m"
+             fi
+            m="$((m+1))"
+          done
+       fi
+       if [ "$FREQS" -eq 1 ]; then
+          unset smArr; unset m;
+          ga=0
+       fi
+}         
+          
+main_detect
 
 end_proc () {
    if [ -s /data/system/GT_PID ]; then
@@ -243,7 +128,7 @@ $busybox echo -e "${B} Little/Regular CPU ${N}" > $tweaked
 t0=0; t=0; t1=0
 while [ "$t0" -lt 3 ]; do
         #Target_Loads_Battery                
-        TL_1=$(($MIN_FREQ_0 + (${CDF[$t0]} * 1)))
+        TL_1=$((${min_Freq[$t0]} + (${CDF[$t0]} * 1)))
         TL_2=$(($TL_1 + ${CDF[$t0]} + ${CDF[$t0]}))
         TL_3=$(($TL_2 + ${CDF[$t0]} + (${CDF[$t0]} / 2)))
 	TL_4=$(($TL_3 + ${CDF[$t0]}))
@@ -253,7 +138,7 @@ while [ "$t0" -lt 3 ]; do
 	TL_8=$(($TL_7 + ${CDF[$t0]}))
 	TL_9=$(($TL_8 + (${CDF[$t0]} * 3)))
         tuneArr1=("above_hispeed_delay" "go_hispeed_load" "hispeed_freq" "target_loads" "sampling_rate" "up_threshold" "down_differential")
-        tuneArr2=("20000 $TL_2:45000 $TL_4:55000 $TL_6:75000 $TL_7:110000 $TL_8:175000 $TL_9:200000" "$((((${CDF[$t0]} / 10000) * 2) + 75))" "$((($IPER * ((($IPER-1) * ${CDF[$t0]}) + $MIN_FREQ_0))))" "0 $MIN_FREQ_0:50 $TL_1:35 $TL_2:45 $TL_3:52 $TL_4:59 $TL_5:75 $TL_6:90 $TL_7:95 $TL_9:99" "$((73000 - (($IPER-1) * 7000)))" "$((100 - (($IPER*3) - ($IPER/2))))" "$((67 - (($IPER*2) - ($IPER/2))))")
+        tuneArr2=("20000 $TL_2:45000 $TL_4:55000 $TL_6:75000 $TL_7:110000 $TL_8:175000 $TL_9:200000" "$((((${CDF[$t0]} / 10000) * 2) + 75))" "$((($IPER * ((($IPER-1) * ${CDF[$t0]}) + ${min_Freq[$t0]}))))" "0 ${min_Freq[$t0]}:50 $TL_1:35 $TL_2:45 $TL_3:52 $TL_4:59 $TL_5:75 $TL_6:90 $TL_7:95 $TL_9:99" "$((73000 - (($IPER-1) * 7000)))" "$((100 - (($IPER*3) - ($IPER/2))))" "$((67 - (($IPER*2) - ($IPER/2))))")
         ta="${#tuneArr1[@]}"
         while [ "$t" -lt "$ta" ]; do
               if [ -e "${gov[$t1]}/${tuneArr1[$t]}" ]; then
@@ -265,26 +150,38 @@ while [ "$t0" -lt 3 ]; do
         done
         unset t;
         t=0
-        if [ "$bL" -eq 1 ] && [ "$t0" -eq 0 ]; then
+        if [ "$FREQS" -eq 2 ] && [ "$t0" -eq 0 ]; then
            reset_splarr
            $busybox echo -e "${B} Big CPU ${N}" >> $tweaked
-           t0=$((t0+2))
+           t0=$((t0+1))
            t1=1
            continue;
         fi
-        if [ "$TC" -eq 1 ] && [ "$t0" -eq 2 ]; then
+        if [ "$FREQS" -eq 3 ] && [ "$t0" -eq 0 ]; then
            reset_splarr
            $busybox echo -e "${B} Middle CPU ${N}" >> $tweaked
-           t0=$((t0-1))
+           t0=$((t0+1))
+           t1=1
+           continue;
+        fi
+        if [ "$FREQS" -eq 3 ] && [ "$t0" -eq 1 ]; then
+           reset_splarr
+           $busybox echo -e "${B} Big CPU ${N}" >> $tweaked
+           t0=$((t0+1))
            t1=2
            continue;
         fi
-        if [ "$bL" -ne 1 ] || [ "$t0" -eq 1 ]; then
+        if [ "$FREQS" -eq 1 ] || [ "$t0" -eq 2 ]; then
            unset t0;
            t0=3
            reset_splarr
         fi
-        if [ "$TC" -ne 1 ] && [ "$t0" -eq 2 ]; then
+        if [ "$FREQS" -eq 2 ] && [ "$t0" -eq 1 ]; then
+           unset t0;
+           t0=3
+           reset_splarr
+        fi
+        if [ "$FREQS" -eq 3 ] && [ "$t0" -eq 2 ]; then
            unset t0;
            t0=3
            reset_splarr
@@ -299,7 +196,7 @@ $busybox echo -e "${B} Little/Regular CPU ${N}" > $tweaked
 t0=0; t=0; t1=0
 while [ "$t0" -lt 3 ]; do
         #Target_Loads_Balanced                
-        TL_1=$(($MIN_FREQ_0 + (${CDF[$t0]} * 2)))
+        TL_1=$((${min_Freq[$t0]} + (${CDF[$t0]} * 2)))
         TL_2=$(($TL_1 + ${CDF[$t0]} + (${CDF[$t0]} / 2)))
         TL_3=$(($TL_2 + ${CDF[$t0]} + (${CDF[$t0]} / 2)))
 	TL_4=$(($TL_3 + ${CDF[$t0]}))
@@ -309,7 +206,7 @@ while [ "$t0" -lt 3 ]; do
 	TL_8=$(($TL_7 + ${CDF[$t0]}))
 	TL_9=$(($TL_8 + (${CDF[$t0]} * 3)))
         tuneArr1=("above_hispeed_delay" "go_hispeed_load" "hispeed_freq" "target_loads" "sampling_rate" "up_threshold" "down_differential")
-        tuneArr2=("20000 $(((${CDF[$t0]} + $MIN_FREQ_0))):30000 $TL_7:60000 $TL_8:20000" "$((((${CDF[$t0]} / 10000) * 2) + 70))" "$((($IPER * ((($IPER-1) * ${CDF[$t0]}) + $MIN_FREQ_0 + (${CDF[$t0]} * 2)))))" "0 $MIN_FREQ_0:40 $TL_1:30 $TL_2:25 $TL_3:50 $TL_4:60 $TL_5:68 $TL_6:75 $TL_7:82 $TL_8:89" "$((63000 - (($IPER-1) * 7000)))" "$((85 - (($IPER*3) - ($IPER/2))))" "$((50 - (($IPER*2) - ($IPER/2))))")
+        tuneArr2=("20000 $(((${CDF[$t0]} + ${min_Freq[$t0]}))):30000 $TL_7:60000 $TL_8:20000" "$((((${CDF[$t0]} / 10000) * 2) + 70))" "$((($IPER * ((($IPER-1) * ${CDF[$t0]}) + ${min_Freq[$t0]} + (${CDF[$t0]} * 2)))))" "0 ${min_Freq[$t0]}:40 $TL_1:30 $TL_2:25 $TL_3:50 $TL_4:60 $TL_5:68 $TL_6:75 $TL_7:82 $TL_8:89" "$((63000 - (($IPER-1) * 7000)))" "$((85 - (($IPER*3) - ($IPER/2))))" "$((50 - (($IPER*2) - ($IPER/2))))")
         ta="${#tuneArr1[@]}"
         while [ "$t" -lt "$ta" ]; do
               if [ -e "${gov[$t1]}/${tuneArr1[$t]}" ]; then
@@ -321,26 +218,38 @@ while [ "$t0" -lt 3 ]; do
         done
         unset t;
         t=0
-        if [ "$bL" -eq 1 ] && [ "$t0" -eq 0 ]; then
+        if [ "$FREQS" -eq 2 ] && [ "$t0" -eq 0 ]; then
            reset_splarr
            $busybox echo -e "${B} Big CPU ${N}" >> $tweaked
-           t0=$((t0+2))
+           t0=$((t0+1))
            t1=1
            continue;
         fi
-        if [ "$TC" -eq 1 ] && [ "$t0" -eq 2 ]; then
+        if [ "$FREQS" -eq 3 ] && [ "$t0" -eq 0 ]; then
            reset_splarr
            $busybox echo -e "${B} Middle CPU ${N}" >> $tweaked
-           t0=$((t0-1))
+           t0=$((t0+1))
+           t1=1
+           continue;
+        fi
+        if [ "$FREQS" -eq 3 ] && [ "$t0" -eq 1 ]; then
+           reset_splarr
+           $busybox echo -e "${B} Big CPU ${N}" >> $tweaked
+           t0=$((t0+1))
            t1=2
            continue;
         fi
-        if [ "$bL" -ne 1 ] || [ "$t0" -eq 1 ]; then
+        if [ "$FREQS" -eq 1 ] || [ "$t0" -eq 2 ]; then
            unset t0;
            t0=3
            reset_splarr
         fi
-        if [ "$TC" -ne 1 ] && [ "$t0" -eq 2 ]; then
+        if [ "$FREQS" -eq 2 ] && [ "$t0" -eq 1 ]; then
+           unset t0;
+           t0=3
+           reset_splarr
+        fi
+        if [ "$FREQS" -eq 3 ] && [ "$t0" -eq 2 ]; then
            unset t0;
            t0=3
            reset_splarr
@@ -355,7 +264,7 @@ $busybox echo -e "${B} Little/Regular CPU ${N}" > $tweaked
 t0=0; t=0; t1=0
 while [ "$t0" -lt 3 ]; do
         #Target_Loads_Performance                
-        TL_1=$(($MIN_FREQ_0 + (${CDF[$t0]} * 3)))
+        TL_1=$((${min_Freq[$t0]} + (${CDF[$t0]} * 3)))
         TL_2=$(($TL_1 + ${CDF[$t0]}))
         TL_3=$(($TL_2 + ${CDF[$t0]} + (${CDF[$t0]} / 2)))
 	TL_4=$(($TL_3 + ${CDF[$t0]}))
@@ -365,7 +274,7 @@ while [ "$t0" -lt 3 ]; do
 	TL_8=$(($TL_7 + ${CDF[$t0]}))
 	TL_9=$(($TL_8 + (${CDF[$t0]} * 3)))
         tuneArr1=("above_hispeed_delay" "go_hispeed_load" "hispeed_freq" "target_loads" "sampling_rate" "up_threshold" "down_differential")
-        tuneArr2=("20000 $(((2 * (${CDF[$t0]} + $MIN_FREQ_0)))):30000 $TL_7:60000 $TL_8:20000" "$((((${CDF[$t0]} / 10000) * 2) + 70))" "$((($IPER * ((($IPER-1) * ${CDF[$t0]}) + $MIN_FREQ_0 + (${CDF[$t0]} * 4)))))" "0 $MIN_FREQ_0:50 $TL_1:25 $TL_2:35 $TL_3:45 $TL_4:60 $TL_5:65 $TL_6:73 $TL_7:90 $TL_8:93 $TL_9:85" "$((53000 - (($IPER-1) * 7000)))" "$((70 - (($IPER*3) - ($IPER/2))))" "$((30 - (($IPER*2) - ($IPER/2))))")
+        tuneArr2=("20000 $(((2 * (${CDF[$t0]} + ${min_Freq[$t0]})))):30000 $TL_7:60000 $TL_8:20000" "$((((${CDF[$t0]} / 10000) * 2) + 70))" "$((($IPER * ((($IPER-1) * ${CDF[$t0]}) + ${min_Freq[$t0]} + (${CDF[$t0]} * 4)))))" "0 ${min_Freq[$t0]}:50 $TL_1:25 $TL_2:35 $TL_3:45 $TL_4:60 $TL_5:65 $TL_6:73 $TL_7:90 $TL_8:93 $TL_9:85" "$((53000 - (($IPER-1) * 7000)))" "$((70 - (($IPER*3) - ($IPER/2))))" "$((30 - (($IPER*2) - ($IPER/2))))")
         ta="${#tuneArr1[@]}"
         while [ "$t" -lt "$ta" ]; do
               if [ -e "${gov[$t1]}/${tuneArr1[$t]}" ]; then
@@ -377,26 +286,38 @@ while [ "$t0" -lt 3 ]; do
         done
         unset t;
         t=0
-        if [ "$bL" -eq 1 ] && [ "$t0" -eq 0 ]; then
+        if [ "$FREQS" -eq 2 ] && [ "$t0" -eq 0 ]; then
            reset_splarr
            $busybox echo -e "${B} Big CPU ${N}" >> $tweaked
-           t0=$((t0+2))
+           t0=$((t0+1))
            t1=1
            continue;
         fi
-        if [ "$TC" -eq 1 ] && [ "$t0" -eq 2 ]; then
+        if [ "$FREQS" -eq 3 ] && [ "$t0" -eq 0 ]; then
            reset_splarr
            $busybox echo -e "${B} Middle CPU ${N}" >> $tweaked
-           t0=$((t0-1))
+           t0=$((t0+1))
+           t1=1
+           continue;
+        fi
+        if [ "$FREQS" -eq 3 ] && [ "$t0" -eq 1 ]; then
+           reset_splarr
+           $busybox echo -e "${B} Big CPU ${N}" >> $tweaked
+           t0=$((t0+1))
            t1=2
            continue;
         fi
-        if [ "$bL" -ne 1 ] || [ "$t0" -eq 1 ]; then
+        if [ "$FREQS" -eq 1 ] || [ "$t0" -eq 2 ]; then
            unset t0;
            t0=3
            reset_splarr
         fi
-        if [ "$TC" -ne 1 ] && [ "$t0" -eq 2 ]; then
+        if [ "$FREQS" -eq 2 ] && [ "$t0" -eq 1 ]; then
+           unset t0;
+           t0=3
+           reset_splarr
+        fi
+        if [ "$FREQS" -eq 3 ] && [ "$t0" -eq 2 ]; then
            unset t0;
            t0=3
            reset_splarr
@@ -419,21 +340,13 @@ while [ $q -lt 158 ]; do
    fi
    if [ "${w1[$q]}" = "second_phase_freq" ] || [ "${w1[$q]}" = "freq_down_step" ] || [ "${w1[$q]}" = "freq_down_step_barrier" ] || [ "${w1[$q]}" = "optimal_freq" ] || [ "${w1[$q]}" = "freq_responsiveness" ]  || [ "${w1[$q]}" = "awake_ideal_freq" ] || [ "${w1[$q]}" = "boost_freq" ] || [ "${w1[$q]}" = "suspend_ideal_freq" ] || [ "${w1[$q]}" = "freq_calc_thresh" ] || [ "${w1[$q]}" = "inter_lofreq" ] || [ "${w1[$q]}" = "staycycles_resetfreq" ] || [ "${w1[$q]}" = "active_floor_freq" ] || [ "${w1[$q]}" = "music_min_freq" ]; then
       unset w2[$q];
-      w2[$q]="$MIN_FREQ_0"
+      w2[$q]="${min_Freq[0]}"
    fi
    if [ -e "${gov[$ga]}/${w1[$q]}" ]; then
       chmod 644 "${gov[$ga]}/${w1[$q]}"
       $busybox echo "${w2[$q]}" > "${gov[$ga]}/${w1[$q]}"
       cecho "${w2[$q]}" "${w1[$q]}"
       $busybox sleep 0.1
-   fi
-   if [ $DC -eq 1 ] && [ $bL -eq 0 ]; then
-      if [ -e "${gov[$gc]}/${w1[$q]}" ]; then
-         "${gov[$gc]}/${w1[$q]}"
-         $busybox echo "${w2[$q]}" > "${gov[$gc]}/${w1[$q]}"
-         cecho "${w2[$q]}" "${w1[$q]}"
-         $busybox sleep 0.1
-      fi
    fi
 done
 unset q; unset field_table_reg; unset w1; unset w2;
@@ -453,7 +366,7 @@ while [ $q -lt 158 ]; do
    fi
    if [ "${w1[$q]}" = "second_phase_freq" ] || [ "${w1[$q]}" = "freq_down_step" ] || [ "${w1[$q]}" = "freq_down_step_barrier" ] || [ "${w1[$q]}" = "optimal_freq" ] || [ "${w1[$q]}" = "freq_responsiveness" ]  || [ "${w1[$q]}" = "awake_ideal_freq" ] || [ "${w1[$q]}" = "boost_freq" ] || [ "${w1[$q]}" = "suspend_ideal_freq" ] || [ "${w1[$q]}" = "freq_calc_thresh" ] || [ "${w1[$q]}" = "inter_lofreq" ] || [ "${w1[$q]}" = "staycycles_resetfreq" ] || [ "${w1[$q]}" = "active_floor_freq" ] || [ "${w1[$q]}" = "music_min_freq" ]; then
       unset w2[$q];
-      w2[$q]="$MIN_FREQ_0"
+      w2[$q]="${min_Freq[0]}"
    fi
    if [ -e "${gov[$ga]}/${w1[$q]}" ]; then
       chmod 644 "${gov[$ga]}/${w1[$q]}"
@@ -479,7 +392,7 @@ while [ $q -lt 158 ]; do
    fi
    if [ "${w1[$q]}" = "second_phase_freq" ] || [ "${w1[$q]}" = "freq_down_step" ] || [ "${w1[$q]}" = "freq_down_step_barrier" ] || [ "${w1[$q]}" = "optimal_freq" ] || [ "${w1[$q]}" = "freq_responsiveness" ]  || [ "${w1[$q]}" = "awake_ideal_freq" ] || [ "${w1[$q]}" = "boost_freq" ] || [ "${w1[$q]}" = "suspend_ideal_freq" ] || [ "${w1[$q]}" = "freq_calc_thresh" ] || [ "${w1[$q]}" = "inter_lofreq" ] || [ "${w1[$q]}" = "staycycles_resetfreq" ] || [ "${w1[$q]}" = "active_floor_freq" ] || [ "${w1[$q]}" = "music_min_freq" ]; then
       unset w2[$q];
-      w2[$q]="$MIN_FREQ_1"
+      w2[$q]="${min_Freq[1]}"
    fi
    if [ -e "${gov[$gb]}/${w1[$q]}" ]; then
       chmod 644 "${gov[$gb]}/${w1[$q]}"
@@ -505,7 +418,7 @@ while [ $q -lt 158 ]; do
    fi
    if [ "${w1[$q]}" = "second_phase_freq" ] || [ "${w1[$q]}" = "freq_down_step" ] || [ "${w1[$q]}" = "freq_down_step_barrier" ] || [ "${w1[$q]}" = "optimal_freq" ] || [ "${w1[$q]}" = "freq_responsiveness" ]  || [ "${w1[$q]}" = "awake_ideal_freq" ] || [ "${w1[$q]}" = "boost_freq" ] || [ "${w1[$q]}" = "suspend_ideal_freq" ] || [ "${w1[$q]}" = "freq_calc_thresh" ] || [ "${w1[$q]}" = "inter_lofreq" ] || [ "${w1[$q]}" = "staycycles_resetfreq" ] || [ "${w1[$q]}" = "active_floor_freq" ] || [ "${w1[$q]}" = "music_min_freq" ]; then
       unset w2[$q];
-      w2[$q]="$MIN_FREQ_2"
+      w2[$q]="${min_Freq[1]}"
    fi
    if [ -e "${gov[$gc]}/${w1[$q]}" ]; then
       chmod 644 "${gov[$gc]}/${w1[$q]}"
@@ -524,10 +437,7 @@ $busybox sleep 3
 
 
 while true; do
-echo $$ > /data/system/GT_PID
-if [ "$core_ctl" -eq 0 ]; then
-	alt_detect
-fi
+$busybox echo $$ > /data/system/GT_PID
 
 if [ "$option" -eq 1 ]; then
    r=2 ; profile=battery;
@@ -542,26 +452,14 @@ $busybox echo "$profile" > /data/system/GT_profile
 
 iper_method
 
-if [ "$bL" -eq 0 ] && [ "$REG" -eq 1 ]; then
+if [ "$FREQS" -eq 1 ]; then
    spl_tunables_$profile
    $busybox echo " " >> $tweaked
    $busybox echo -e "${B}Tunables${N} ${R}Little/Regular${N}" >> $tweaked
    apply_profile_reg
    
 fi
-if [ "$bL" -eq 0 ] && [ "$SC" -eq 1 ]; then
-   spl_tunables_$profile
-   $busybox echo " " >> $tweaked
-   $busybox echo -e "${B}Tunables${N} ${R}Little/Regular${N}" >> $tweaked
-   apply_profile_reg
-fi
-if [ "$bL" -eq 0 ] && [ "$DC" -eq 1 ]; then
-   spl_tunables_$profile
-   $busybox echo " " >> $tweaked
-   $busybox echo -e "${B}Tunables${N} ${R}Little/Regular${N}" >> $tweaked
-   apply_profile_reg
-fi
-if [ "$bL" -eq 1 ] && [ "$DC" -eq 1 ]; then
+if [ "$FREQS" -eq 2 ]; then
    spl_tunables_$profile
    $busybox echo " " >> $tweaked
    $busybox echo -e "${B}Tunables${N} ${R}Little/Regular${N}" >> $tweaked
@@ -570,7 +468,7 @@ if [ "$bL" -eq 1 ] && [ "$DC" -eq 1 ]; then
    $busybox echo -e "${B}Tunables${N} ${R}Big${N}" >> $tweaked
    apply_profile_big
 fi
-if [ "$bL" -eq 1 ] && [ "$TC" -eq 1 ]; then
+if [ "$FREQS" -eq 3 ]; then
    spl_tunables_$profile
    $busybox echo " " >> $tweaked
    $busybox echo -e "${B}Tunables${N} ${R}Little/Regular${N}" >> $tweaked
