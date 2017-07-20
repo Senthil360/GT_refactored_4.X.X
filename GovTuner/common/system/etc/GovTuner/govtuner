@@ -25,7 +25,7 @@ core="/system/etc/GovTuner"
 busybox="/system/etc/GovTuner/busybox"
 getprop="/system/bin/getprop"
 init="/system/etc/init.d"
-ver="4.1 RC_10"
+ver="4.1"
 id="$(id)"; id="${id#*=}"; id="${id%%\(*}"; id="${id%% *}"
 INIT_TEST="/gt_test"
 VER=$($busybox awk -F= '/ro.build.version.release/{print $NF}' /system/build.prop)
@@ -409,17 +409,17 @@ while true; do
 			$busybox echo ""
 			if [ "$FREQS" -eq 3 ]; then
 				#For 3 CPU
-				$busybox echo -e "Governor LITTLE core: ${W}${cur_gov[$ga]}${N}"
-				$busybox echo -e "Governor Middle core: ${W}${cur_gov[$gb]}${N}"
-				$busybox echo -e "Governor big core:    ${W}${cur_gov[$gc]}${N}"
+				$busybox echo -e "Governor LITTLE core: ${W}${sca_gov[$ga]}${N}"
+				$busybox echo -e "Governor Middle core: ${W}${sca_gov[$gb]}${N}"
+				$busybox echo -e "Governor big core:    ${W}${sca_gov[$gc]}${N}"
 			fi
 			if [ "$FREQS" -eq 2 ]; then
-				$busybox echo -e "Governor LITTLE core: ${W}${cur_gov[$ga]}${N}"
-				$busybox echo -e "Governor big core:    ${W}${cur_gov[$gc]}${N}"
+				$busybox echo -e "Governor LITTLE core: ${W}${sca_gov[$ga]}${N}"
+				$busybox echo -e "Governor big core:    ${W}${sca_gov[$gc]}${N}"
 			fi
 		fi
 		if [ "$FREQS" -eq 1 ]; then
-			$busybox echo -e "Governor: ${W}${cur_gov[$ga]}${N}"
+			$busybox echo -e "Governor: ${W}${sca_gov[$ga]}${N}"
 		fi
 	fi
 
@@ -463,7 +463,7 @@ while true; do
 	$busybox echo $divider
 	if [ "$core_ctl" -eq 0 ]; then
 		ab=0
-		for i in "${cur_gov[@]}"; do
+		for i in "${sca_gov[@]}"; do
 			if [ "$i" = "zzmoove" ]; then
 			   if [ -f ${gov[$ab]}/disable_hotplug ]; then
 				HOTPLUG=$($busybox cat ${gov[$ab]}/disable_hotplug)
@@ -574,7 +574,7 @@ while true; do
 			$busybox echo "Enabling zzmoove hotplug"
 			sleep 2
 			d2=0
-			for i in "${cur_gov[@]}"; do
+			for i in "${sca_gov[@]}"; do
 				if [ "$i" = "zzmoove" ]; then
 				   if [ -f ${gov[$d2]}/disable_hotplug ]; then
 					$busybox echo 1 > ${gov[$d2]}/disable_hotplug
@@ -589,7 +589,7 @@ while true; do
 			$busybox echo "Enabling zzmoove hotplug"
 			sleep 2
 			d1=0
-			for i in "${cur_gov[@]}"; do
+			for i in "${sca_gov[@]}"; do
 				if [ "$i" = "zzmoove" ]; then
 				   if [ -f ${gov[$d1]}/disable_hotplug ]; then
 				       $busybox echo 0 > ${gov[$d1]}/disable_hotplug
