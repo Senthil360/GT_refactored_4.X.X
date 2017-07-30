@@ -510,6 +510,7 @@ while true; do
 	else
 		$busybox echo -e "${W} v. Change Execution Interval${N} ${R}($INT_SEC)${N}"
 	fi
+        $busybox echo " d. Debug GovTuner"
 	$busybox echo " e. Exit"
 	$busybox echo $divider
 	if [ -s /data/system/GT_PID ]; then
@@ -569,6 +570,12 @@ while true; do
 			sleep 2
 		;;
 
+                d|D)
+                       $busybox setsid /system/etc/GovTuner/profiles/GovTuner_hybrid 4 &
+                       $busybox clear;
+                       $busybox sleep 10
+                ;;
+
 		s|S)
 			$busybox clear;
 			$busybox echo "Enabling zzmoove hotplug"
@@ -616,9 +623,9 @@ while true; do
 
 		c|C)
 			$busybox clear;
-			sh $core/change.sh
+			sh "$core/change.sh"
 		;;
-
+                
 		e|E)
 			$busybox clear;
 			$busybox mount -o remount,ro /system 2>/dev/null
