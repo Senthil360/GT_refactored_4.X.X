@@ -15,6 +15,19 @@ Bl='\e[01;30m'
 C='\e[01;36m'
 W='\e[01;37m'
 
+#debug vars
+debug_log="/sdcard/debug_log"
+div="--------------------------"
+getprop="/system/bin/getprop"
+VER=$($busybox awk -F= '/ro.build.version.release/{print $NF}' /system/build.prop)
+DEVICE=$($getprop ro.product.model | $busybox grep '[a-zA-Z0-9]');
+
+space() {
+    $busybox echo " " >> $debug_log
+    $busybox echo "$div" >> $debug_log
+    $busybox echo " " >> $debug_log
+}
+
 
 main_detect() {
         DIR="/sys/devices/system/cpu/*"
@@ -85,9 +98,42 @@ main_detect() {
           unset smArr; unset m;
           ga=0
        fi
-}         
-          
+}
+
+debug_func() {
+$busybox echo "Device Model : $DEVICE" > $debug_log
+$busybox echo "Android version : $VER" >> $debug_log
+space
+$busybox echo "Max_freq directories" >> $debug_log
+$busybox echo " "
+$busybox echo $checkA >> $debug_log
+space
+$busybox echo "Min_freq directories" >> $debug_log
+$busybox echo " "
+$busybox echo $checkB >> $debug_log
+space
+$busybox echo "Scaling governor directories" >> $debug_log
+$busybox echo " "
+$busybox echo $checkC >> $debug_log
+space
+$busybox echo "Number of Clusters : $FREQS" >> $debug_log
+space
+
+$busybox echo "Send the below link to GT Team" >> $debug_log
+name=$($busybox echo $DEVICE | $busybox tr -d ' ')
+curl --upload-file $debug_log https://transfer.sh/$name.txt 1>>$debug_log
+$busybox echo " "
+$busybox echo "$div"
+$busybox echo " "
+$busybox echo " The debug file is located at ${G}$debug_log${N} , send it to GT Team to troubleshoot your issues"
+$busybox echo " "
+$busybox sleep 10
+}
+        
 main_detect
+
+#alt_detect() {To_Be_Continued}
+   
 
 end_proc () {
    if [ -s /data/system/GT_PID ]; then
@@ -431,14 +477,15 @@ unset q; unset field_table_big; unset w1; unset w2;
 reset_splarr
 }
 
-$busybox echo "Applying $profile profile"
 
 $busybox sleep 3
 
-
 while true; do
-$busybox echo $$ > /data/system/GT_PID
-
+if [ "$option" -eq 1 ] || [ "$option" -eq 2 ] || [ "$option" -eq 3 ]; then
+   $busybox echo $$ > /data/system/GT_PID
+   $busybox echo "Applying $profile profile"
+fi
+#Execute profiles
 if [ "$option" -eq 1 ]; then
    r=2 ; profile=battery;
 fi
@@ -447,6 +494,12 @@ if [ "$option" -eq 2 ]; then
 fi
 if [ "$option" -eq 3 ]; then
    r=4; profile=performance;
+fi
+#debug
+if [ "$option" -eq 4 ]; then
+   main_detect
+   debug_func
+   exit
 fi
 $busybox echo "$profile" > /data/system/GT_profile
 
