@@ -4,6 +4,7 @@
 core_ctl=0
 option=$1
 tweaked="/data/system/tweaked"
+busybox="/system/etc/GovTuner/busybox"
 # colors
 G='\e[01;32m'
 R='\e[01;31m'
@@ -129,10 +130,40 @@ $busybox echo " The debug file is located at ${G}$debug_log${N} , send it to GT 
 $busybox echo " "
 $busybox sleep 10
 }
-        
-main_detect
 
-#alt_detect() {To_Be_Continued}
+alt_det() {
+j=0
+if [ -e /sdcard/GT_list ]; then
+   $buysbox rm -f /sdcard/GT_list 2>/dev/null
+fi
+cpu_dir="/sys/devices/system/cpu"
+cd /sys/devices/system/cpu
+req_file=("scaling_governor" "cpuinfo_max_freq" "cpuinfo_min_freq")
+while [ "$j" -lt "${#req_file[@]}" ]; do
+   echo "$j and ${req_file[$j]}"
+   $busybox echo "${req_file[$j]} - $DEVICE" >> /sdcard/GT_list
+   $busybox ls $cpu_dir/${req_file[$j]} 1>>/sdcard/GT_list 2>/dev/null
+   $busybox cat $($busybox ls $cpu_dir/${req_file[$j]} 2>/dev/null) 2>/dev/null 1>>/sdcard/GT_list
+   $busybox ls $cpu_dir/*/${req_file[$j]} 1>>/sdcard/GT_list 2>/dev/null
+   $busybox cat $($busybox ls $cpu_dir/*/${req_file[$j]} 2>/dev/null) 2>/dev/null 1>>/sdcard/GT_list
+   $busybox ls $cpu_dir/*/*/${req_file[$j]} 1>>/sdcard/GT_list 2>/dev/null
+   $busybox cat $($busybox ls $cpu_dir/*/*/${req_file[$j]} 2>/dev/null) 1>>/sdcard/GT_list 2>/dev/null
+   $busybox ls $cpu_dir/*/*/*/${req_file[$j]} 1>>/sdcard/GT_list 2>/dev/null
+   $busybox cat $($busybox ls $cpu_dir/*/*/*/${req_file[$j]} 2>/dev/null) 1>>/sdcard/GT_list 2>/dev/null
+   $busybox echo " " >> /sdcard/GT_list
+   $busybox echo "$div" >> /sdcard/GT_list
+   $busybox echo " " >> /sdcard/GT_list
+  j=$((j+1))
+done
+}
+
+#main_detect
+$busybox echo 155
+$busybox sleep 3
+alt_det
+$busybox echo 158
+$busybox sleep 3
+exit
    
 
 end_proc () {
