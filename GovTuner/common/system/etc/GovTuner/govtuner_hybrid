@@ -157,10 +157,22 @@ while [ "$j" -lt "${#req_file[@]}" ]; do
 done
 }
 
+cpu_sort() {
+   $busybox echo "testing cpu_sort function"
+   $busybox sleep 3
+   cpu_no=$($busybox cat /sdcard/GT_list | $busybox grep "/scaling_governor" | $busybox wc -w)
+   $busybox echo "Total no of governor dirs : $cpu_no"
+   $busybox sleep 2
+   list_no=$($busybox cat /sdcard/GT_list | $busybox wc -l)
+   $busybox echo "Total no of lines : $list_no"
+   $busybox sleep 2
+}
+
 #main_detect
 $busybox echo 155
 $busybox sleep 3
 alt_det
+cpu_sort
 $busybox echo 158
 $busybox sleep 3
 exit
