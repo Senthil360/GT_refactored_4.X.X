@@ -159,9 +159,32 @@ done
 
 cpu_sort() {
    $busybox echo "testing cpu_sort function"
-   $busybox sleep 3
    cpu_no=$($busybox cat /sdcard/GT_list | $busybox grep "/scaling_governor" | $busybox wc -w)
    $busybox echo "Total no of governor dirs : $cpu_no"
+   cd=1
+   $busybox echo " cd is $cd , cpu_no is $cpu_no"
+   ab=0;
+   while [ $ab -lt $cpu_no ]; do
+       arr_gov[$ab]=$($busybox cat /sdcard/GT_list | $busybox grep -A $cd "/scaling_governor" | $busybox tail -n 1)
+       arr_path[$ab]=$($busybox cat /sdcard/GT_list | $busybox grep "/cpuinfo_max_freq" | $busybox head -n $cd | $buysbox tail -n 1 | $busybox cut -d '/' -f1-6)
+       arr_max[$ab]=$($busybox cat /sdcard/GT_list | $busybox grep -A $cd "/cpuinfo_max_freq" | $busybox tail -n 1)
+       arr_min[$ab]=$($busybox cat /sdcard/GT_list | $busybox grep -A $cd "/cpuinfo_min_freq" | $busybox tail -n 1)
+   $buybox sleep 2
+   $busybox echo "Governor $ab is ${arr_gov[$ab]}"
+   $busybox echo "Path $ab is ${arr_path[$ab]}"
+   $busybox echo "Max frequency $ab is ${arr_max[$ab]}"
+   $busybox echo "Min frequency $ab is ${arr_min[$ab]}"
+   $busybox sleep 1
+   ab=$((ab+1))
+   cd=$((cd+1))
+   done
+   y=0;
+   max_sort=($(for ef in ${arr_max[@]}; do echo $ef $y; y=$((y+1)); done | sort -n))
+   z=0;
+   min_sort=($(for gh in ${arr_min[@]}; do echo $gh $z; z=$((z+1)); done | sort -n))
+   echo "Sorted max array ${max_sort[@]}"
+   $busybox sleep 2
+   echo "Sorted min array ${min_sort[@]}"
    $busybox sleep 2
    list_no=$($busybox cat /sdcard/GT_list | $busybox wc -l)
    $busybox echo "Total no of lines : $list_no"
