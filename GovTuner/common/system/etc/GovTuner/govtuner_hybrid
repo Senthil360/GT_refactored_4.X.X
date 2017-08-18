@@ -30,76 +30,6 @@ space() {
 }
 
 
-main_detect() {
-        DIR="/sys/devices/system/cpu/*"
-        checkA=$($busybox find $DIR -name cpuinfo_max_freq)
-        checkB=$($busybox find $DIR -name cpuinfo_min_freq)
-        total=$($busybox find $DIR -name cpuinfo_max_freq | $busybox wc -l)
-        A=0; A1=1; C=0; D=1
-        while [ "$A" -lt "$total" ]; do
-            check1[$A]=$($busybox echo "$checkA" | $busybox head -n $A1 | $busybox tail -n 1)
-            check2[$A]=$($busybox echo "$checkB" | $busybox head -n $A1 | $busybox tail -n 1)
-            check3[$A]=$($busybox realpath "${check1[$A]}")
-            check4[$A]=$($busybox realpath "${check2[$A]}")
-            path[$A]=$($busybox echo "${check1[$A]}" | $busybox rev | $busybox cut -c 17- | $busybox rev)
-          if [ "${check1[$A]}" = "${check3[$A]}" ] && [ "${check2[$A]}" = "${check4[$A]}" ]; then
-             sca_gov[$C]=$($busybox cat "${path[$A]}/scaling_governor")
-             checkC=$($busybox find $DIR -name "${sca_gov[$C]}")
-             gov[$C]=$($busybox echo "$checkC" | $busybox head -n $D | $busybox tail -n 1)
-             max_Freq[$C]=$($busybox cat "${check1[$A]}")
-             min_Freq[$C]=$($busybox cat "${check2[$A]}")
-             CDF[$C]=$(((${max_Freq[$C]} - ${min_Freq[$C]}) / 10 ))
-             if [ "${CDF[$C]}" -lt 0 ]; then
-                CDF[$C]=$(( -1 * ${CDF[$C]} ))
-             fi
-             if [ "${gov[$C]}" = "/sys/devices/system/cpu/cpufreq/${sca_gov[$C]}" ]; then
-                ga=0
-                break
-             fi
-             $busybox sleep 0.2
-             C=$((C+1))
-             D=$((D+1))
-          fi
-         A=$((A+1))
-         A1=$((A1+1))
-       done
-       FREQS="${#CDF[@]}"
-       if [ "$FREQS" -eq 3 ]; then
-          unset smArr; unset m;
-          smArr=($(for i in "${CDF[@]}"; do $busybox echo "$i"; done | $busybox sort -n))
-          m=0
-          while [ "$m" -lt 3 ]; do
-             if [ "${smArr[0]}" -eq "${CDF[$m]}" ]; then
-                ga="$m"
-             fi
-             if [ "${smArr[1]}" -eq "${CDF[$m]}" ]; then
-                gb="$m"
-             fi
-             if [ "${smArr[2]}" -eq "${CDF[$m]}" ]; then
-                gc="$m"
-             fi
-            m="$((m+1))"
-          done
-       fi   
-       if [ "$FREQS" -eq 2 ]; then
-          unset smArr; unset m;
-          smArr=($(for i in "${CDF[@]}"; do $busybox echo "$i"; done | $busybox sort -n))
-          m=0
-          while [ "$m" -lt 2 ]; do
-             if [ "${smArr[0]}" -eq "${CDF[$m]}" ]; then
-                ga="$m"
-             fi
-             if [ "${smArr[1]}" -eq "${CDF[$m]}" ]; then
-                gc="$m"
-             fi
-            m="$((m+1))"
-          done
-       fi
-       if [ "$FREQS" -eq 1 ]; then
-          unset smArr; unset m;
-          ga=0
-       fi
-}
 
 debug_func() {
 $busybox echo "Device Model : $DEVICE" > $debug_log
@@ -156,24 +86,37 @@ while [ "$j" -lt "${#req_file[@]}" ]; do
   j=$((j+1))
 done
 }
-
+find_total() {
+   ct=1; cluster_total=1;
+   dif[0]=${DF[0]}
+   while [ $ct -lt "${#DF[@]}" ]; do
+      if [ ${dif[0]} -eq ${DF[$ct]} ]; then
+         unset dif[0];
+         dif[0]=${DF[$ct]}
+         ct=$(ct+1))
+         continue;
+      elif [ ${dif[0]} -ne ${DF[$ct]} ]; then
+           unset dif[0];
+           dif[0]=${DF[$ct]}
+           cluster_total=$((cluster_total+1))
+           ct=$((ct+1))
+           continue;
+      fi
+   done
+   unset dif[0]; unset ct;
+}
+           
 cpu_sort() {
    $busybox echo "testing cpu_sort function"
    cpu_no=$($busybox cat /sdcard/GT_list | $busybox grep "/scaling_governor" | $busybox wc -w)
-   $busybox echo "Total no of governor dirs : $cpu_no"
-   cd=1
-   $busybox echo " cd is $cd , cpu_no is $cpu_no"
-   ab=0;
+   cd=1; ab=0;
+   count_slash=$($busybox cat /sdcard/GT_list | $busybox grep "/scaling_governor" | $busybox tail -n 1 | $busybox tr -cd '/' | $busybox wc -c)
+   count_slash=$((count_slash-1))
    while [ $ab -lt $cpu_no ]; do
        arr_gov[$ab]=$($busybox cat /sdcard/GT_list | $busybox grep -A $cd "/scaling_governor" | $busybox tail -n 1)
-       arr_path[$ab]=$($busybox cat /sdcard/GT_list | $busybox grep "/cpuinfo_max_freq" | $busybox head -n $cd | $buysbox tail -n 1 | $busybox cut -d '/' -f1-6)
+       arr_path[$ab]=$($busybox cat /sdcard/GT_list | $busybox grep "/cpuinfo_max_freq" | $busybox head -n $cd | $buysbox tail -n 1 | $busybox cut -d '/' -f1-$count_slash)
        arr_max[$ab]=$($busybox cat /sdcard/GT_list | $busybox grep -A $cd "/cpuinfo_max_freq" | $busybox tail -n 1)
        arr_min[$ab]=$($busybox cat /sdcard/GT_list | $busybox grep -A $cd "/cpuinfo_min_freq" | $busybox tail -n 1)
-   $buybox sleep 2
-   $busybox echo "Governor $ab is ${arr_gov[$ab]}"
-   $busybox echo "Path $ab is ${arr_path[$ab]}"
-   $busybox echo "Max frequency $ab is ${arr_max[$ab]}"
-   $busybox echo "Min frequency $ab is ${arr_min[$ab]}"
    $busybox sleep 1
    ab=$((ab+1))
    cd=$((cd+1))
@@ -182,22 +125,25 @@ cpu_sort() {
    max_sort=($(for ef in ${arr_max[@]}; do echo $ef $y; y=$((y+1)); done | sort -n))
    z=0;
    min_sort=($(for gh in ${arr_min[@]}; do echo $gh $z; z=$((z+1)); done | sort -n))
-   echo "Sorted max array ${max_sort[@]}"
-   $busybox sleep 2
-   echo "Sorted min array ${min_sort[@]}"
+   $busybox echo " " >> /sdcard/GT_list
+   ad=0;
+   while [ $ad -lt ${#max_sort[@]} ]; do
+        DF[$ad]=$((${max_sort[$ad]} - ${min_sort[$ad]}))
+        if [ ${DF[$ad]} -lt 0 ];
+           DF[$ad]=$(( -1*${DF[$ad]}))
+        fi
+    $busybox echo ${DF[$ad]} >> /sdcard/GT_list
+    ad=$((ad+1))
+   done
    $busybox sleep 2
    list_no=$($busybox cat /sdcard/GT_list | $busybox wc -l)
    $busybox echo "Total no of lines : $list_no"
    $busybox sleep 2
 }
 
-#main_detect
-$busybox echo 155
-$busybox sleep 3
 alt_det
 cpu_sort
-$busybox echo 158
-$busybox sleep 3
+find_total
 exit
    
 
@@ -237,69 +183,36 @@ reset_splarr () {
 
 spl_tunables_battery() {
 $busybox echo -e "${B} Little/Regular CPU ${N}" > $tweaked
-t0=0; t=0; t1=0
-while [ "$t0" -lt 3 ]; do
+t=0
+while [ "$t" -lt $cpu_no ]; do
         #Target_Loads_Battery                
-        TL_1=$((${min_Freq[$t0]} + (${CDF[$t0]} * 1)))
-        TL_2=$(($TL_1 + ${CDF[$t0]} + ${CDF[$t0]}))
-        TL_3=$(($TL_2 + ${CDF[$t0]} + (${CDF[$t0]} / 2)))
-	TL_4=$(($TL_3 + ${CDF[$t0]}))
-	TL_5=$(($TL_4 + ${CDF[$t0]}))
-	TL_6=$(($TL_5 + ${CDF[$t0]} + (${CDF[$t0]} / 2)))
-	TL_7=$(($TL_6 + ${CDF[$t0]} + (${CDF[$t0]} / 2)))
-	TL_8=$(($TL_7 + ${CDF[$t0]}))
-	TL_9=$(($TL_8 + (${CDF[$t0]} * 3)))
+        TL_1=$((${arr_min[$t]} + (${CDF[$t]}))
+        TL_2=$(($TL_1 + ${CDF[$t]} + ${CDF[$t]}))
+        TL_3=$(($TL_2 + ${CDF[$t]} + (${CDF[$t]} / 2)))
+	TL_4=$(($TL_3 + (${CDF[$t]} / 2)))
+	TL_5=$(($TL_4 + ${CDF[$t]}))
+	TL_6=$(($TL_5 + (${CDF[$t]} / 2)))
+	TL_7=$(($TL_6 + ${CDF[$t]} + (${CDF[$t]} / 2)))
+	TL_8=$(($TL_7 + (${CDF[$t]} / 2))
+	TL_9=$(($TL_8 + ${CDF[$t]}))
         tuneArr1=("go_hispeed_load" "hispeed_freq" "target_loads" "sampling_rate" "up_threshold" "down_differential")
-        tuneArr2=("$(((${CDF[$t0]} / 10000)  + 75))" "$((($IPER * ((($IPER-1) * ${CDF[$t0]}) + ${min_Freq[$t0]}))))" "0 ${min_Freq[$t0]}:50 $TL_1:35 $TL_2:45 $TL_3:52 $TL_4:59 $TL_5:75 $TL_6:90 $TL_7:95 $TL_9:99" "$((73000 - (($IPER-1) * 7000)))" "$((100 - (($IPER*3) - ($IPER/2))))" "$((67 - (($IPER*2) - ($IPER/2))))")
-        ta="${#tuneArr1[@]}"
-        while [ "$t" -lt "$ta" ]; do
-              if [ -e "${gov[$t1]}/${tuneArr1[$t]}" ]; then
-                 chmod 644 "${gov[$t1]}/${tuneArr1[$t]}"
-                 $busybox echo "${tuneArr2[$t]}" > "${gov[$t1]}/${tuneArr1[$t]}"
-                 cecho "${tuneArr2[$t]}" "${tuneArr1[$t]}";
+        tuneArr2=("$(((${CDF[$t]} / 10000)  + 75))" "$((($IPER * ((($IPER-1) * ${CDF[$t]}) + ${arr_min[$t]}))))" "0 ${arr_min[$t]}:50 $TL_1:35 $TL_2:45 $TL_3:52 $TL_4:59 $TL_5:75 $TL_6:90 $TL_7:95 $TL_9:99" "$((73000 - (($IPER-1) * 7000)))" "$((100 - (($IPER*3) - ($IPER/2))))" "$((67 - (($IPER*2) - ($IPER/2))))")
+        ta=0
+        while [ $ta -lt "${#tuneArr2[@]}" ]; do
+              if [ -e "${arr_path[$t]}/${tuneArr1[$ta]}" ]; then
+                 chmod 644 "${arr_path[$t]}/${tuneArr1[$ta]}"
+                 $busybox echo "${tuneArr2[$ta]}" > "${arr_path[$t]}/${tuneArr1[$ta]}"
+                 cecho "${tuneArr2[$ta]}" "${tuneArr1[$ta]}";
               fi
-         t=$((t+1))
+         ta=$((ta+1))
         done
-        unset t;
-        t=0
-        if [ "$FREQS" -eq 2 ] && [ "$t0" -eq 0 ]; then
-           reset_splarr
-           $busybox echo -e "${B} Big CPU ${N}" >> $tweaked
-           t0=$((t0+1))
-           t1=1
-           continue;
-        fi
-        if [ "$FREQS" -eq 3 ] && [ "$t0" -eq 0 ]; then
-           reset_splarr
-           $busybox echo -e "${B} Middle CPU ${N}" >> $tweaked
-           t0=$((t0+1))
-           t1=1
-           continue;
-        fi
-        if [ "$FREQS" -eq 3 ] && [ "$t0" -eq 1 ]; then
-           reset_splarr
-           $busybox echo -e "${B} Big CPU ${N}" >> $tweaked
-           t0=$((t0+1))
-           t1=2
-           continue;
-        fi
-        if [ "$FREQS" -eq 1 ] || [ "$t0" -eq 2 ]; then
-           unset t0;
-           t0=3
-           reset_splarr
-        fi
-        if [ "$FREQS" -eq 2 ] && [ "$t0" -eq 1 ]; then
-           unset t0;
-           t0=3
-           reset_splarr
-        fi
-        if [ "$FREQS" -eq 3 ] && [ "$t0" -eq 2 ]; then
-           unset t0;
-           t0=3
-           reset_splarr
-        fi
+        unset ta;
+        if [ $t -lt $cluster_total ]; then
+              t=$((t+1))
+              continue;
+        fi       
 done
-unset t0; unset t;
+unset t;
 reset_splarr
 }
 
@@ -319,55 +232,22 @@ while [ "$t0" -lt 3 ]; do
 	TL_9=$(($TL_8 + (${CDF[$t0]} * 3)))
         tuneArr1=("go_hispeed_load" "hispeed_freq" "target_loads" "sampling_rate" "up_threshold" "down_differential")
         tuneArr2=("$(((${CDF[$t0]} / 10000)  + 70))" "$((($IPER * ((($IPER-1) * ${CDF[$t0]}) + ${min_Freq[$t0]} + (${CDF[$t0]} * 2)))))" "40 ${min_Freq[$t0]}:40 $TL_1:30 $TL_2:25 $TL_3:50 $TL_4:60 $TL_5:68 $TL_6:75 $TL_7:82 $TL_8:89" "$((63000 - (($IPER-1) * 7000)))" "$((85 - (($IPER*3) - ($IPER/2))))" "$((50 - (($IPER*2) - ($IPER/2))))")
-        ta="${#tuneArr1[@]}"
-        while [ "$t" -lt "$ta" ]; do
-              if [ -e "${gov[$t1]}/${tuneArr1[$t]}" ]; then
-                 chmod 644 "${gov[$t1]}/${tuneArr1[$t]}"
-                 $busybox echo "${tuneArr2[$t]}" > "${gov[$t1]}/${tuneArr1[$t]}"
-                 cecho "${tuneArr2[$t]}" "${tuneArr1[$t]}";
+       ta=0
+        while [ $ta -lt "${#tuneArr2[@]}" ]; do
+              if [ -e "${arr_path[$t]}/${tuneArr1[$ta]}" ]; then
+                 chmod 644 "${arr_path[$t]}/${tuneArr1[$ta]}"
+                 $busybox echo "${tuneArr2[$ta]}" > "${arr_path[$t]}/${tuneArr1[$ta]}"
+                 cecho "${tuneArr2[$ta]}" "${tuneArr1[$ta]}";
               fi
-         t=$((t+1))
+         ta=$((ta+1))
         done
-        unset t;
-        t=0
-        if [ "$FREQS" -eq 2 ] && [ "$t0" -eq 0 ]; then
-           reset_splarr
-           $busybox echo -e "${B} Big CPU ${N}" >> $tweaked
-           t0=$((t0+1))
-           t1=1
-           continue;
-        fi
-        if [ "$FREQS" -eq 3 ] && [ "$t0" -eq 0 ]; then
-           reset_splarr
-           $busybox echo -e "${B} Middle CPU ${N}" >> $tweaked
-           t0=$((t0+1))
-           t1=1
-           continue;
-        fi
-        if [ "$FREQS" -eq 3 ] && [ "$t0" -eq 1 ]; then
-           reset_splarr
-           $busybox echo -e "${B} Big CPU ${N}" >> $tweaked
-           t0=$((t0+1))
-           t1=2
-           continue;
-        fi
-        if [ "$FREQS" -eq 1 ] || [ "$t0" -eq 2 ]; then
-           unset t0;
-           t0=3
-           reset_splarr
-        fi
-        if [ "$FREQS" -eq 2 ] && [ "$t0" -eq 1 ]; then
-           unset t0;
-           t0=3
-           reset_splarr
-        fi
-        if [ "$FREQS" -eq 3 ] && [ "$t0" -eq 2 ]; then
-           unset t0;
-           t0=3
-           reset_splarr
-        fi
+        unset ta;
+        if [ $t -lt $cluster_total ]; then
+              t=$((t+1))
+              continue;
+        fi       
 done
-unset t0; unset t;
+unset t;
 reset_splarr
 }
 
@@ -387,55 +267,22 @@ while [ "$t0" -lt 3 ]; do
 	TL_9=$(($TL_8 + (${CDF[$t0]} * 3)))
         tuneArr1=("go_hispeed_load" "hispeed_freq" "target_loads" "sampling_rate" "up_threshold" "down_differential")
         tuneArr2=("$(((${CDF[$t0]} / 10000)  + 70))" "$((($IPER * ((($IPER-1) * ${CDF[$t0]}) + ${min_Freq[$t0]} + (${CDF[$t0]} * 4)))))" "60 ${min_Freq[$t0]}:50 $TL_1:25 $TL_2:35 $TL_3:45 $TL_4:60 $TL_5:65 $TL_6:73 $TL_7:90 $TL_8:93 $TL_9:85" "$((53000 - (($IPER-1) * 7000)))" "$((70 - (($IPER*3) - ($IPER/2))))" "$((30 - (($IPER*2) - ($IPER/2))))")
-        ta="${#tuneArr1[@]}"
-        while [ "$t" -lt "$ta" ]; do
-              if [ -e "${gov[$t1]}/${tuneArr1[$t]}" ]; then
-                 chmod 644 "${gov[$t1]}/${tuneArr1[$t]}"
-                 $busybox echo "${tuneArr2[$t]}" > "${gov[$t1]}/${tuneArr1[$t]}"
-                 cecho "${tuneArr2[$t]}" "${tuneArr1[$t]}";
+        ta=0
+        while [ $ta -lt "${#tuneArr2[@]}" ]; do
+              if [ -e "${arr_path[$t]}/${tuneArr1[$ta]}" ]; then
+                 chmod 644 "${arr_path[$t]}/${tuneArr1[$ta]}"
+                 $busybox echo "${tuneArr2[$ta]}" > "${arr_path[$t]}/${tuneArr1[$ta]}"
+                 cecho "${tuneArr2[$ta]}" "${tuneArr1[$ta]}";
               fi
-         t=$((t+1))
+         ta=$((ta+1))
         done
-        unset t;
-        t=0
-        if [ "$FREQS" -eq 2 ] && [ "$t0" -eq 0 ]; then
-           reset_splarr
-           $busybox echo -e "${B} Big CPU ${N}" >> $tweaked
-           t0=$((t0+1))
-           t1=1
-           continue;
-        fi
-        if [ "$FREQS" -eq 3 ] && [ "$t0" -eq 0 ]; then
-           reset_splarr
-           $busybox echo -e "${B} Middle CPU ${N}" >> $tweaked
-           t0=$((t0+1))
-           t1=1
-           continue;
-        fi
-        if [ "$FREQS" -eq 3 ] && [ "$t0" -eq 1 ]; then
-           reset_splarr
-           $busybox echo -e "${B} Big CPU ${N}" >> $tweaked
-           t0=$((t0+1))
-           t1=2
-           continue;
-        fi
-        if [ "$FREQS" -eq 1 ] || [ "$t0" -eq 2 ]; then
-           unset t0;
-           t0=3
-           reset_splarr
-        fi
-        if [ "$FREQS" -eq 2 ] && [ "$t0" -eq 1 ]; then
-           unset t0;
-           t0=3
-           reset_splarr
-        fi
-        if [ "$FREQS" -eq 3 ] && [ "$t0" -eq 2 ]; then
-           unset t0;
-           t0=3
-           reset_splarr
-        fi
+        unset ta;
+        if [ $t -lt $cluster_total ]; then
+              t=$((t+1))
+              continue;
+        fi       
 done
-unset t0; unset t;
+unset t;
 reset_splarr
 }                                                
      
