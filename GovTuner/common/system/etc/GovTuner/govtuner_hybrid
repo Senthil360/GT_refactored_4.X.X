@@ -110,10 +110,12 @@ find_total() {
 }
 
 find_diff() {
-max=$1
-min=$2
+file_max=$1
+file_min=$2
+max=$($busybox cat $file_max)
+min=$($busybox cat $file_min)
 differ=$((max-min))
-unset max; unset min;
+unset max; unset min; unset file_max; unset file_min;
 }
            
 cpu_sort() {
@@ -295,111 +297,75 @@ done
 unset t;
 reset_splarr
 }                                                
-     
-apply_profile_reg () {
-q=0
-while [ $q -lt 158 ]; do
-   q=$((q+1));
-   field_table_reg="/system/etc/GovTuner/profiles/field_table_reg"
-   w1[$q]=$($busybox head -n $q $field_table_reg | $busybox tail -n 1 | $busybox cut -d '-' -f1)
-   w2[$q]=$($busybox head -n $q $field_table_reg | $busybox tail -n 1 | $busybox cut -d '%' -f$r | cut -d '-' -f1)
-   if [ "${w1[$q]}" = "go_hispeed_load" ] || [ "${w1[$q]}" = "hispeed_freq" ] || [ "${w1[$q]}" = "target_loads" ] || [ "${w1[$q]}" = "sampling_rate" ] || [ "${w1[$q]}" = "up_threshold" ] || [ "${w1[$q]}" = "down_differential" ]; then
-      unset w1[$q]; unset w2[$q];
-      continue
+
+assign_selection() {
+  if [ $cluster_total -eq 2 ] && [ $v -eq 1 ]; then
+     unset selection;
+     selection="big"
+  fi
+  if [ $cluster_total -eq 3 ] && [ $v -eq 1 ]; then
+     unset selection;
+     selection="middle"
+  fi
+  if [ $cluster_total -eq 3 ] && [ $v -eq 2 ]; then
+     unset selection;
+     selection="big"
+  fi
+}
+        
+apply_profile () {
+u=0; v=0;
+selection="little"
+while [ $u -lt ${#arr_gov[@]} ]; do
+      find_diff "${arr_path[$u]}/cpuinfo_max_freq" "${arr_path[$u]}/cpuinfo_min_freq"
+      if [ $differ -eq ${cluster_diff[$v]} ]; then
+        q=0
+        while [ $q -lt 158 ]; do
+         q=$((q+1));
+         field_table="/system/etc/GovTuner/profiles/field_table_$selection"
+         w1[$q]=$($busybox head -n $q $field_table | $busybox tail -n 1 | $busybox cut -d '-' -f1)
+         w2[$q]=$($busybox head -n $q $field_table | $busybox tail -n 1 | $busybox cut -d '%' -f$r | cut -d '-' -f1)
+         if [ "${w1[$q]}" = "go_hispeed_load" ] || [ "${w1[$q]}" = "hispeed_freq" ] || [ "${w1[$q]}" = "target_loads" ] || [ "${w1[$q]}" = "sampling_rate" ] || [ "${w1[$q]}" = "up_threshold" ] || [ "${w1[$q]}" = "down_differential" ]; then
+            unset w1[$q]; unset w2[$q];
+            continue
+         fi
+         if [ "${w1[$q]}" = "second_phase_freq" ] || [ "${w1[$q]}" = "freq_down_step" ] || [ "${w1[$q]}" = "freq_down_step_barrier" ] || [ "${w1[$q]}" = "optimal_freq" ] || [ "${w1[$q]}" = "freq_responsiveness" ]  || [ "${w1[$q]}" = "awake_ideal_freq" ] || [ "${w1[$q]}" = "boost_freq" ] || [ "${w1[$q]}" = "suspend_ideal_freq" ] || [ "${w1[$q]}" = "freq_calc_thresh" ] || [ "${w1[$q]}" = "inter_lofreq" ] || [ "${w1[$q]}" = "staycycles_resetfreq" ] || [ "${w1[$q]}" = "active_floor_freq" ] || [ "${w1[$q]}" = "music_min_freq" ]; then
+          unset w2[$q];
+          w2[$q]="${arr_min[$u]}"
+         fi
+         if [ -e "${arr_gov[$u]}/${w1[$q]}" ]; then
+          chmod 644 "${arr_gov[$u]}/${w1[$q]}"
+          $busybox echo "${w2[$q]}" > "${arr_gov[$u]}/${w1[$q]}"
+          cecho "${w2[$q]}" "${w1[$q]}"
+          $busybox sleep 0.1
+         fi
+        done
+      fi
+   u=$((u+1))
+   if [ $cluster_total -eq 2 ] && [ $v -eq 1 ]; then
+      break;
    fi
-   if [ "${w1[$q]}" = "second_phase_freq" ] || [ "${w1[$q]}" = "freq_down_step" ] || [ "${w1[$q]}" = "freq_down_step_barrier" ] || [ "${w1[$q]}" = "optimal_freq" ] || [ "${w1[$q]}" = "freq_responsiveness" ]  || [ "${w1[$q]}" = "awake_ideal_freq" ] || [ "${w1[$q]}" = "boost_freq" ] || [ "${w1[$q]}" = "suspend_ideal_freq" ] || [ "${w1[$q]}" = "freq_calc_thresh" ] || [ "${w1[$q]}" = "inter_lofreq" ] || [ "${w1[$q]}" = "staycycles_resetfreq" ] || [ "${w1[$q]}" = "active_floor_freq" ] || [ "${w1[$q]}" = "music_min_freq" ]; then
-      unset w2[$q];
-      w2[$q]="${min_Freq[0]}"
+   if [ $cluster_total -eq 3 ] && [ $v -eq 2 ]; then
+      break;
    fi
-   if [ -e "${arr_path[$p]}/${w1[$q]}" ]; then
-      chmod 644 "${gov[$ga]}/${w1[$q]}"
-      $busybox echo "${w2[$q]}" > "${gov[$ga]}/${w1[$q]}"
-      cecho "${w2[$q]}" "${w1[$q]}"
-      $busybox sleep 0.1
+   if [ $u -eq ${#arr_gov[@]} ]; then
+      if [ $cluster_total -gt 1 ] && [ $v -eq 0 ]; then
+         unset u; unset v;
+         u=0; v=1;
+         assign_selection
+         continue;
+      fi
+      if [ $cluster_total -eq 3 ] && [ $v -eq 1 ]; then
+         unset u; unset v;
+         u=0; v=2;
+         assign_selection
+         continue;
+      fi
    fi
 done
 unset q; unset field_table_reg; unset w1; unset w2;
 reset_splarr
 }
-
-apply_profile_little () {
-q=0
-while [ $q -lt 158 ]; do
-   q=$((q+1));
-   field_table_little=/system/etc/GovTuner/profiles/field_table_little
-   w1[$q]=$($busybox head -n $q $field_table_little | $busybox tail -n 1 | $busybox cut -d '-' -f1)
-   w2[$q]=$($busybox head -n $q $field_table_little | $busybox tail -n 1 | $busybox cut -d '%' -f$r | cut -d '-' -f1)
-   if [ "${w1[$q]}" = "go_hispeed_load" ] || [ "${w1[$q]}" = "hispeed_freq" ] || [ "${w1[$q]}" = "target_loads" ] || [ "${w1[$q]}" = "sampling_rate" ] || [ "${w1[$q]}" = "up_threshold" ] || [ "${w1[$q]}" = "down_differential" ]; then
-      unset w1[$q]; unset w2[$q];
-      continue
-   fi
-   if [ "${w1[$q]}" = "second_phase_freq" ] || [ "${w1[$q]}" = "freq_down_step" ] || [ "${w1[$q]}" = "freq_down_step_barrier" ] || [ "${w1[$q]}" = "optimal_freq" ] || [ "${w1[$q]}" = "freq_responsiveness" ]  || [ "${w1[$q]}" = "awake_ideal_freq" ] || [ "${w1[$q]}" = "boost_freq" ] || [ "${w1[$q]}" = "suspend_ideal_freq" ] || [ "${w1[$q]}" = "freq_calc_thresh" ] || [ "${w1[$q]}" = "inter_lofreq" ] || [ "${w1[$q]}" = "staycycles_resetfreq" ] || [ "${w1[$q]}" = "active_floor_freq" ] || [ "${w1[$q]}" = "music_min_freq" ]; then
-      unset w2[$q];
-      w2[$q]="${min_Freq[0]}"
-   fi
-   if [ -e "${gov[$ga]}/${w1[$q]}" ]; then
-      chmod 644 "${gov[$ga]}/${w1[$q]}"
-      $busybox echo "${w2[$q]}" > "${gov[$ga]}/${w1[$q]}"
-      cecho "${w2[$q]}" "${w1[$q]}"
-      $busybox sleep 0.1
-   fi
-done
-unset q; unset field_table_little; unset w1; unset w2;
-reset_splarr
-}
-
-apply_profile_middle () {
-q=0
-while [ $q -lt 158 ]; do
-   q=$((q+1));
-   field_table_middle=/system/etc/GovTuner/profiles/field_table_middle
-   w1[$q]=$($busybox head -n $q $field_table_middle | $busybox tail -n 1 | $busybox cut -d '-' -f1)
-   w2[$q]=$($busybox head -n $q $field_table_middle | $busybox tail -n 1 | $busybox cut -d '%' -f$r | cut -d '-' -f1)
-   if [ "${w1[$q]}" = "go_hispeed_load" ] || [ "${w1[$q]}" = "hispeed_freq" ] || [ "${w1[$q]}" = "target_loads" ] || [ "${w1[$q]}" = "sampling_rate" ] || [ "${w1[$q]}" = "up_threshold" ] || [ "${w1[$q]}" = "down_differential" ]; then
-      unset w1[$q]; unset w2[$q];
-      continue
-   fi
-   if [ "${w1[$q]}" = "second_phase_freq" ] || [ "${w1[$q]}" = "freq_down_step" ] || [ "${w1[$q]}" = "freq_down_step_barrier" ] || [ "${w1[$q]}" = "optimal_freq" ] || [ "${w1[$q]}" = "freq_responsiveness" ]  || [ "${w1[$q]}" = "awake_ideal_freq" ] || [ "${w1[$q]}" = "boost_freq" ] || [ "${w1[$q]}" = "suspend_ideal_freq" ] || [ "${w1[$q]}" = "freq_calc_thresh" ] || [ "${w1[$q]}" = "inter_lofreq" ] || [ "${w1[$q]}" = "staycycles_resetfreq" ] || [ "${w1[$q]}" = "active_floor_freq" ] || [ "${w1[$q]}" = "music_min_freq" ]; then
-      unset w2[$q];
-      w2[$q]="${min_Freq[1]}"
-   fi
-   if [ -e "${gov[$gb]}/${w1[$q]}" ]; then
-      chmod 644 "${gov[$gb]}/${w1[$q]}"
-      $busybox echo "${w2[$q]}" > "${gov[$gb]}/${w1[$q]}"
-      cecho "${w2[$q]}" "${w1[$q]}"
-      $busybox sleep 0.1
-   fi
-done
-unset q; unset field_table_middle; unset w1; unset w2;
-reset_splarr
-}
-
-apply_profile_big () {
-q=0
-while [ $q -lt 158 ]; do
-   q=$((q+1));
-   field_table_big=/system/etc/GovTuner/profiles/field_table_big
-   w1[$q]=$($busybox head -n $q $field_table_big | $busybox tail -n 1 | $busybox cut -d '-' -f1)
-   w2[$q]=$($busybox head -n $q $field_table_big | $busybox tail -n 1 | $busybox cut -d '%' -f$r | cut -d '-' -f1)
-   if [ "${w1[$q]}" = "go_hispeed_load" ] || [ "${w1[$q]}" = "hispeed_freq" ] || [ "${w1[$q]}" = "target_loads" ] || [ "${w1[$q]}" = "sampling_rate" ] || [ "${w1[$q]}" = "up_threshold" ] || [ "${w1[$q]}" = "down_differential" ]; then
-      unset w1[$q]; unset w2[$q];
-      continue
-   fi
-   if [ "${w1[$q]}" = "second_phase_freq" ] || [ "${w1[$q]}" = "freq_down_step" ] || [ "${w1[$q]}" = "freq_down_step_barrier" ] || [ "${w1[$q]}" = "optimal_freq" ] || [ "${w1[$q]}" = "freq_responsiveness" ]  || [ "${w1[$q]}" = "awake_ideal_freq" ] || [ "${w1[$q]}" = "boost_freq" ] || [ "${w1[$q]}" = "suspend_ideal_freq" ] || [ "${w1[$q]}" = "freq_calc_thresh" ] || [ "${w1[$q]}" = "inter_lofreq" ] || [ "${w1[$q]}" = "staycycles_resetfreq" ] || [ "${w1[$q]}" = "active_floor_freq" ] || [ "${w1[$q]}" = "music_min_freq" ]; then
-      unset w2[$q];
-      w2[$q]="${min_Freq[1]}"
-   fi
-   if [ -e "${gov[$gc]}/${w1[$q]}" ]; then
-      chmod 644 "${gov[$gc]}/${w1[$q]}"
-      $busybox echo "${w2[$q]}" > "${gov[$gc]}/${w1[$q]}"
-      cecho "${w2[$q]}" "${w1[$q]}"
-      $busybox sleep 0.1
-   fi
-done
-unset q; unset field_table_big; unset w1; unset w2;
-reset_splarr
-}
-
 
 $busybox sleep 3
 
