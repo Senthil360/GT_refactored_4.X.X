@@ -1,6 +1,6 @@
 #!/system/bin/sh
 #GovTuner 2017 Copyright - Debuffer and Senthil360
-#Hybrid Profile coded by Senthil360 (XDA) @ senthilmanikandan360@gmail.com
+#Hybrid Profile by Senthil360 (Recognized Developer @xda-developers.com)  <senthilmanikandan360@gmail.com>
 core_ctl=0
 option=$1
 tweaked="/data/system/tweaked"
@@ -47,28 +47,7 @@ while [ "$j" -lt "${#req_file[@]}" ]; do
    $busybox echo " " >> /sdcard/GT_list
   j=$((j+1))
 done
-}
-find_total() {
-   ct=1; cluster_total=1; ctf=1
-   dif[0]=${DF[0]}
-   cluster_diff[0]=${DF[0]}
-   while [ $ct -lt "${#DF[@]}" ]; do
-      if [ ${dif[0]} -eq ${DF[$ct]} ]; then
-         unset dif[0];
-         dif[0]=${DF[$ct]}
-         ct=$(ct+1))
-         continue;
-      elif [ ${dif[0]} -ne ${DF[$ct]} ]; then
-           unset dif[0];
-           dif[0]=${DF[$ct]}
-           cluster_diff[$ctf]=${DF[$ct]}
-           cluster_total=$((cluster_total+1))
-           ct=$((ct+1))
-           ctf=$((ctf+1))
-           continue;
-      fi
-   done
-   unset dif[0]; unset ct;
+unset j; unset req_file;
 }
 
 find_diff() {
@@ -102,26 +81,45 @@ cpu_sort() {
    $busybox echo " " >> /sdcard/GT_list
    ad=0;
    while [ $ad -lt ${#max_sort[@]} ]; do
-        DF[$ad]=$((${max_sort[$ad]} - ${min_sort[$ad]}))
-        if [ ${DF[$ad]} -lt 0 ];
-           DF[$ad]=$(( -1*${DF[$ad]}))
+        CDF[$ad]=$((${max_sort[$ad]} - ${min_sort[$ad]}))
+        if [ ${CDF[$ad]} -lt 0 ];
+           CDF[$ad]=$(( -1*${CDF[$ad]}))
         fi
-    $busybox echo ${DF[$ad]} >> /sdcard/GT_list
+    $busybox echo ${CDF[$ad]} >> /sdcard/GT_list
     ad=$((ad+1))
    done
    $busybox sleep 2
-   list_no=$($busybox cat /sdcard/GT_list | $busybox wc -l)
-   $busybox echo "Total no of lines : $list_no"
-   $busybox sleep 2
+}
+
+find_total() {
+   ct=1; cluster_total=1; ctf=1
+   dif[0]=${CDF[0]}
+   cluster_diff[0]=${CDF[0]}
+   while [ $ct -lt "${#CDF[@]}" ]; do
+      if [ ${dif[0]} -eq ${CDF[$ct]} ]; then
+         unset dif[0];
+         dif[0]=${CDF[$ct]}
+         ct=$(ct+1))
+         continue;
+      elif [ ${dif[0]} -ne ${CDF[$ct]} ]; then
+           unset dif[0];
+           dif[0]=${CDF[$ct]}
+           cluster_diff[$ctf]=${CDF[$ct]}
+           cluster_total=$((cluster_total+1))
+           ct=$((ct+1))
+           ctf=$((ctf+1))
+           continue;
+      fi
+   done
+   unset dif[0]; unset ct;
 }
 
 alt_det
 cpu_sort
 find_total
-exit
    
 
-end_proc () {
+end_proc() {
    if [ -s /data/system/GT_PID ]; then
       proc1=$($busybox cat /data/system/GT_PID)
       proc2=$(ps | $busybox grep "$proc1" | $busybox head -n 1 | $busybox tr -s ' ' | $busybox cut -d ' ' -f2)
@@ -142,7 +140,7 @@ cecho() {
 	unset tunable; unset val
 }
 
-iper_method () {
+iper_method() {
    IPER=1
    if [ -s /data/system/iper ]; then
       unset IPER
@@ -150,9 +148,22 @@ iper_method () {
    fi
 }
 
+check_apply() {
+   ta=0
+        while [ $ta -lt "${#tuneArr2[@]}" ]; do
+              if [ -e "${arr_path[$t]}/${tuneArr1[$ta]}" ]; then
+                 chmod 644 "${arr_path[$t]}/${tuneArr1[$ta]}"
+                 $busybox echo "${tuneArr2[$ta]}" > "${arr_path[$t]}/${tuneArr1[$ta]}"
+                 cecho "${tuneArr2[$ta]}" "${tuneArr1[$ta]}";
+              fi
+         ta=$((ta+1))
+        done
+        unset ta;
+}
 
-reset_splarr () {
-  unset TL_1; unset TL_2; unset TL_3; unset TL_4; unset TL_5; unset TL_6; unset TL_7; unset TL_8; unset TL_9; unset tuneArr; unset tunerArr2; unset ta; unset t1;
+
+reset_splarr() {
+  unset TL_1; unset TL_2; unset TL_3; unset TL_4; unset TL_5; unset TL_6; unset TL_7; unset TL_8; unset TL_9; unset tuneArr1; unset tunerArr2; unset ta; unset t;
 }
 
 spl_tunables_battery() {
@@ -171,22 +182,12 @@ while [ "$t" -lt $cpu_no ]; do
 	TL_9=$(($TL_8 + ${CDF[$t]}))
         tuneArr1=("go_hispeed_load" "hispeed_freq" "target_loads" "sampling_rate" "up_threshold" "down_differential")
         tuneArr2=("$(((${CDF[$t]} / 10000)  + 75))" "$((($IPER * ((($IPER-1) * ${CDF[$t]}) + ${arr_min[$t]}))))" "0 ${arr_min[$t]}:50 $TL_1:35 $TL_2:45 $TL_3:52 $TL_4:59 $TL_5:75 $TL_6:90 $TL_7:95 $TL_9:99" "$((73000 - (($IPER-1) * 7000)))" "$((100 - (($IPER*3) - ($IPER/2))))" "$((67 - (($IPER*2) - ($IPER/2))))")
-        ta=0
-        while [ $ta -lt "${#tuneArr2[@]}" ]; do
-              if [ -e "${arr_path[$t]}/${tuneArr1[$ta]}" ]; then
-                 chmod 644 "${arr_path[$t]}/${tuneArr1[$ta]}"
-                 $busybox echo "${tuneArr2[$ta]}" > "${arr_path[$t]}/${tuneArr1[$ta]}"
-                 cecho "${tuneArr2[$ta]}" "${tuneArr1[$ta]}";
-              fi
-         ta=$((ta+1))
-        done
-        unset ta;
+        check_apply
         if [ $t -lt $cluster_total ]; then
               t=$((t+1))
               continue;
         fi       
 done
-unset t;
 reset_splarr
 }
 
@@ -206,22 +207,12 @@ while [ "$t" -lt $cpu_no ]; do
 	TL_9=$(($TL_8 + ${CDF[$t]}))
         tuneArr1=("go_hispeed_load" "hispeed_freq" "target_loads" "sampling_rate" "up_threshold" "down_differential")
         tuneArr2=("$(((${CDF[$t]} / 10000)  + 70))" "$((($IPER * ((($IPER-1) * ${CDF[$t0]}) + ${arr_min[$t]} + (${CDF[$t]} * 2)))))" "40 ${arr_min[$t]}:40 $TL_1:30 $TL_2:25 $TL_3:50 $TL_4:60 $TL_5:68 $TL_6:75 $TL_7:82 $TL_8:89" "$((63000 - (($IPER-1) * 7000)))" "$((85 - (($IPER*3) - ($IPER/2))))" "$((50 - (($IPER*2) - ($IPER/2))))")
-       ta=0
-        while [ $ta -lt "${#tuneArr2[@]}" ]; do
-              if [ -e "${arr_path[$t]}/${tuneArr1[$ta]}" ]; then
-                 chmod 644 "${arr_path[$t]}/${tuneArr1[$ta]}"
-                 $busybox echo "${tuneArr2[$ta]}" > "${arr_path[$t]}/${tuneArr1[$ta]}"
-                 cecho "${tuneArr2[$ta]}" "${tuneArr1[$ta]}";
-              fi
-         ta=$((ta+1))
-        done
-        unset ta;
+        check_apply
         if [ $t -lt $cluster_total ]; then
               t=$((t+1))
               continue;
         fi       
 done
-unset t;
 reset_splarr
 }
 
@@ -241,22 +232,12 @@ while [ "$t" -lt $cpu_no ]; do
 	TL_9=$(($TL_8 + ${CDF[$t]}))
         tuneArr1=("go_hispeed_load" "hispeed_freq" "target_loads" "sampling_rate" "up_threshold" "down_differential")
         tuneArr2=("$(((${CDF[$t]} / 10000)  + 70))" "$((($IPER * ((($IPER-1) * ${CDF[$t0]}) + ${arr_min[$t]} + (${CDF[$t]} * 4)))))" "60 ${arr_min[$t]}:50 $TL_1:25 $TL_2:35 $TL_3:45 $TL_4:60 $TL_5:65 $TL_6:73 $TL_7:90 $TL_8:93 $TL_9:85" "$((53000 - (($IPER-1) * 7000)))" "$((70 - (($IPER*3) - ($IPER/2))))" "$((30 - (($IPER*2) - ($IPER/2))))")
-        ta=0
-        while [ $ta -lt "${#tuneArr2[@]}" ]; do
-              if [ -e "${arr_path[$t]}/${tuneArr1[$ta]}" ]; then
-                 chmod 644 "${arr_path[$t]}/${tuneArr1[$ta]}"
-                 $busybox echo "${tuneArr2[$ta]}" > "${arr_path[$t]}/${tuneArr1[$ta]}"
-                 cecho "${tuneArr2[$ta]}" "${tuneArr1[$ta]}";
-              fi
-         ta=$((ta+1))
-        done
-        unset ta;
+        check_apply
         if [ $t -lt $cluster_total ]; then
               t=$((t+1))
               continue;
         fi       
 done
-unset t;
 reset_splarr
 }                                                
 
@@ -275,9 +256,11 @@ assign_selection() {
   fi
 }
         
-apply_profile () {
+apply_profile() {
 u=0; v=0;
 selection="little"
+$busybox echo " " >> $tweaked
+         $busybox echo -e "${B}Tunables${N} ${R}$selection${N}" >> $tweaked
 while [ $u -lt ${#arr_gov[@]} ]; do
       find_diff "${arr_path[$u]}/cpuinfo_max_freq" "${arr_path[$u]}/cpuinfo_min_freq"
       if [ $differ -eq ${cluster_diff[$v]} ]; then
@@ -302,6 +285,7 @@ while [ $u -lt ${#arr_gov[@]} ]; do
           $busybox sleep 0.1
          fi
         done
+      unset differ;
       fi
    u=$((u+1))
    if [ $cluster_total -eq 2 ] && [ $v -eq 1 ]; then
@@ -315,12 +299,16 @@ while [ $u -lt ${#arr_gov[@]} ]; do
          unset u; unset v;
          u=0; v=1;
          assign_selection
+         $busybox echo " " >> $tweaked
+         $busybox echo -e "${B}Tunables${N} ${R}$selection${N}" >> $tweaked
          continue;
       fi
       if [ $cluster_total -eq 3 ] && [ $v -eq 1 ]; then
          unset u; unset v;
          u=0; v=2;
          assign_selection
+         $busybox echo " " >> $tweaked
+         $busybox echo -e "${B}Tunables${N} ${R}$selection${N}" >> $tweaked
          continue;
       fi
    fi
@@ -346,54 +334,22 @@ fi
 if [ "$option" -eq 3 ]; then
    r=4; profile=performance;
 fi
-#debug
-if [ "$option" -eq 4 ]; then
-   main_detect
-   debug_func
-   exit
-fi
 $busybox echo "$profile" > /data/system/GT_profile
 
 iper_method
 
 if [ "$cluster_total" -eq 1 ]; then
    spl_tunables_$profile
-   $busybox echo " " >> $tweaked
-   $busybox echo -e "${B}Tunables${N} ${R}Little/Regular${N}" >> $tweaked
-   apply_profile_reg
+   apply_profile
    
 fi
 if [ "$cluster_total" -eq 2 ]; then
    spl_tunables_$profile
-   $busybox echo " " >> $tweaked
-   $busybox echo -e "${B}Tunables${N} ${R}Little/Regular${N}" >> $tweaked
-   apply_profile_little
-   $busybox echo " " >> $tweaked
-   $busybox echo -e "${B}Tunables${N} ${R}Big${N}" >> $tweaked
-   apply_profile_big
+   apply_profile
 fi
 if [ "$cluster_total" -eq 3 ]; then
    spl_tunables_$profile
-   $busybox echo " " >> $tweaked
-   $busybox echo -e "${B}Tunables${N} ${R}Little/Regular${N}" >> $tweaked
-   apply_profile_little
-   $busybox echo " " >> $tweaked
-   $busybox echo -e "${B}Tunables${N} ${R}Middle${N}" >> $tweaked
-   apply_profile_middle
-   $busybox echo " " >> $tweaked
-   $busybox echo -e "${B}Tunables${N} ${R}Big${N}" >> $tweaked
-   apply_profile_big
+   apply_profile
 fi
-if [ -s /data/system/INTERVAL_SEC ]; then
-   inter=$($busybox cat /data/system/INTERVAL_SEC)
-   if [ "$inter" != "NO" ]; then
-      $busybox sleep $inter
-   fi
-   if [ "$inter" = "NO" ]; then
-      break
-   fi
-fi
-if [ ! -e /data/system/INTERVAL_SEC ]; then
-   break
-fi
+exit
 done
