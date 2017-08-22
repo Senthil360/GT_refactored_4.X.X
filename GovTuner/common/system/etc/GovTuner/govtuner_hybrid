@@ -58,6 +58,24 @@ min=$($busybox cat $file_min)
 differ=$(((max-min) / 10))
 unset max; unset min; unset file_max; unset file_min;
 }
+
+check_order() {
+a=1; b=2; d=1
+c=$(cat sorted.txt | tr -cd '%' | wc -m)
+store[0]=0;
+while [ $a -lt $c ]; do
+  initial=$(cat sorted.txt | cut -d '-' -f$a | cut -d '%' -f2 | tr -d ' ')
+  final=$(cat sorted.txt | cut -d '-' -f$b | cut -d '%' -f2 | tr -d ' ')
+  if [ $initial -ne $final ]; then
+     store[$d]=$(cat sorted.txt | cut -d '-' -f$((b+1)) | cut -d '%' -f1 | tr -d ' ')
+     d=$((d+1))
+  fi
+  #hit=$(cat sorted.txt | cut 
+  echo "$initial and $final"
+  a=$((a+1))
+  b=$((b+1))
+done
+}
            
 cpu_sort() {
    cpu_no=$($busybox cat /sdcard/GT_list | $busybox grep "/scaling_governor" | $busybox wc -w)
@@ -83,6 +101,9 @@ cpu_sort() {
     $busybox echo ${CDF[$ad]} >> /sdcard/GT_list
     ad=$((ad+1))
    done
+   z=0;
+   sortedArr=$(for i in ${arr_max[@]}; do echo "$i-$z%"; z=$((z+1)); done | sort -n)
+   $busybox echo ${sortedArr[@]} > /sdcard/sorted.txt
    $busybox sleep 2
 }
 
