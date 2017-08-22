@@ -60,7 +60,6 @@ unset max; unset min; unset file_max; unset file_min;
 }
            
 cpu_sort() {
-   $busybox echo "testing cpu_sort function"
    cpu_no=$($busybox cat /sdcard/GT_list | $busybox grep "/scaling_governor" | $busybox wc -w)
    cd=1; ab=0;
    count_slash=$($busybox cat /sdcard/GT_list | $busybox grep "/scaling_governor" | $busybox tail -n 1 | $busybox tr -cd '/' | $busybox wc -c)
@@ -69,7 +68,6 @@ cpu_sort() {
        arr_path[$ab]=$($busybox cat /sdcard/GT_list | $busybox grep "/cpuinfo_max_freq" | $busybox head -n $cd | $buysbox tail -n 1 | $busybox cut -d '/' -f1-$count_slash)
        arr_max[$ab]=$($busybox cat /sdcard/GT_list | $busybox grep -A $cd "/cpuinfo_max_freq" | $busybox tail -n 1)
        arr_min[$ab]=$($busybox cat /sdcard/GT_list | $busybox grep -A $cd "/cpuinfo_min_freq" | $busybox tail -n 1)
-   $busybox sleep 1
    ab=$((ab+1))
    cd=$((cd+1))
    done
@@ -196,7 +194,6 @@ while [ "$t" -lt $cpu_no ]; do
 	TL_7=$(($TL_6 + ${CDF[$t]} + (${CDF[$t]} / 2)))
 	TL_8=$(($TL_7 + (${CDF[$t]} / 2)))
 	TL_9=$(($TL_8 + ${CDF[$t]}))
-        sleep 2
         tuneArr1=("go_hispeed_load" "hispeed_freq" "target_loads" "sampling_rate" "up_threshold" "down_differential")
         tuneArr2=("$(((${CDF[$t]} / 10000)  + 70))" "$((($IPER * ((($IPER-1) * ${CDF[$t0]}) + ${arr_min[$t]} + (${CDF[$t]} * 2)))))" "40 ${arr_min[$t]}:40 $TL_1:30 $TL_2:25 $TL_3:50 $TL_4:60 $TL_5:68 $TL_6:75 $TL_7:82 $TL_8:89" "$((63000 - (($IPER-1) * 7000)))" "$((85 - (($IPER*3) - ($IPER/2))))" "$((50 - (($IPER*2) - ($IPER/2))))")
         ta=0
@@ -266,16 +263,12 @@ selection="little"
 $busybox echo " " >> $tweaked
          $busybox echo -e "${B}Tunables${N} ${R}$selection${N}" >> $tweaked
 while [ $u -lt ${#arr_gov[@]} ]; do
-      echo "test 276"
       find_diff "${arr_path[$u]}/cpuinfo_max_freq" "${arr_path[$u]}/cpuinfo_min_freq"
-      echo "$differ and ${cluster_diff[$v]}"
       if [ $differ -eq ${cluster_diff[$v]} ]; then
-        echo "test 273 matches $selection"
         q=0
         while [ $q -lt 158 ]; do
          q=$((q+1));
          field_table="/system/etc/GovTuner/profiles/field_table_$selection"
-         echo "$field_table"
          w1[$q]=$($busybox head -n $q $field_table | $busybox tail -n 1 | $busybox cut -d '-' -f1)
          w2[$q]=$($busybox head -n $q $field_table | $busybox tail -n 1 | $busybox cut -d '%' -f$r | cut -d '-' -f1)
          if [ "${w1[$q]}" = "go_hispeed_load" ] || [ "${w1[$q]}" = "hispeed_freq" ] || [ "${w1[$q]}" = "target_loads" ] || [ "${w1[$q]}" = "sampling_rate" ] || [ "${w1[$q]}" = "up_threshold" ] || [ "${w1[$q]}" = "down_differential" ]; then
@@ -286,9 +279,7 @@ while [ $u -lt ${#arr_gov[@]} ]; do
           unset w2[$q];
           w2[$q]="${arr_min[$u]}"
          fi
-         echo "test 290 ${arr_path[$u]}/${arr_gov[$u]}/${w1[$q]}"
          if [ -e "${arr_path[$u]}/${arr_gov[$u]}/${w1[$q]}" ]; then
-          echo "test 292 ${arr_path[$u]}/${arr_gov[$u]}/${w1[$q]}  and ${w2[$q]}"
           chmod 644 "${arr_path[$u]}/${arr_gov[$u]}/${w1[$q]}"
           $busybox echo -n "${w2[$q]}" > "${arr_path[$u]}/${arr_gov[$u]}/${w1[$q]}"
           cecho "${w2[$q]}" "${w1[$q]}"
@@ -332,7 +323,6 @@ $busybox sleep 3
 while true; do
 if [ "$option" -eq 1 ] || [ "$option" -eq 2 ] || [ "$option" -eq 3 ]; then
    $busybox echo $$ > /data/system/GT_PID
-   $busybox echo "Applying $profile profile"
 fi
 #Execute profiles
 if [ "$option" -eq 1 ]; then
@@ -344,13 +334,10 @@ fi
 if [ "$option" -eq 3 ]; then
    r=4; profile=performance;
 fi
+$busybox echo "Applying $profile profile"
 $busybox echo "$profile" > /data/system/GT_profile
 
 iper_method
-
-$busybox echo "${CDF[@]}"
-$busybox echo "test 341"
-$busybox echo $cluster_total
 
 if [ "$cluster_total" -eq 1 ]; then
    spl_tunables_$profile
@@ -358,7 +345,6 @@ if [ "$cluster_total" -eq 1 ]; then
    
 fi
 if [ "$cluster_total" -eq 2 ]; then
-   echo "applying $profile cluster"
    spl_tunables_$profile
    apply_profile
 fi
