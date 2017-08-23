@@ -23,15 +23,12 @@ fi
 divider="======="
 busybox="/system/etc/GovTuner/busybox"
 getprop="/system/bin/getprop"
-init="/system/etc/init.d"
 ver="4.1"
 id="$(id)"; id="${id#*=}"; id="${id%%\(*}"; id="${id%% *}"
-INIT_TEST="/gt_test"
 VER=$($busybox awk -F= '/ro.build.version.release/{print $NF}' /system/build.prop)
 DEVICE=$($getprop ro.product.model | $busybox grep '[a-zA-Z0-9]');
-FREQS=0
 ROOT=0
-INTERVAL=/data/system/INTERVAL_SEC
+INTERVAL=/data/system/INTERVAL
 core_ctl=0
 TIME=$($busybox cat /proc/uptime | $busybox cut -d '.' -f1)
 
@@ -448,7 +445,7 @@ while true; do
 	fi
 	$busybox echo ""
         #RUN-ON-BOOT
-	if [ -e /gt_init ]; then
+	if [ -e /gt_boot ]; then
            $busybox echo -e "${W}Run on-boot support${N}: ${G} Present ${N}"
         else
            $busybox echo -e "${W}Run on-boot support${N}: ${R} Not Available ${N}"

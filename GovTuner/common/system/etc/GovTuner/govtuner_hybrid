@@ -339,6 +339,25 @@ unset q; unset field_table_reg; unset w1; unset w2;
 reset_splarr
 }
 
+onboot_exec() {
+ onboot=/system/etc/GovTuner/00gt_init
+ mount -o remount,rw /system 2>/dev/null
+ if [ -d /system/su.d ]; then
+    cp -f $onboot /system/su.d/00gt_init
+    chmod 777 /system/su.d/00gt_init
+ fi
+ if [ -d /system/etc/init.d ]; then
+    cp -f $onboot /system/etc/init.d/00gt_init
+    chmod 777 /system/etc/init.d/00gt_init
+ fi
+ if [ -d /system/etc/init ]; then
+    cp -f $onboot /system/etc/init/00gt_init
+    chmod 777 /system/etc/init/00gt_init
+ fi
+ mount -o remount,ro /system
+}
+    
+
 $busybox sleep 3
 
 while true; do
@@ -373,5 +392,6 @@ if [ "$cluster_total" -eq 3 ]; then
    spl_tunables_$profile
    apply_profile
 fi
-exit
+onboot_exec
+
 done

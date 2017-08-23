@@ -18,8 +18,11 @@ busybox=/system/etc/GovTuner/busybox
 $busybox rm /data/system/tuned 2>/dev/null
 $busybox rm /data/system/tweaked 2>/dev/null
 $busybox sleep $SLEEP_TIME
+if [ -e /gt_boot ]; then
+   exit
+fi
 $busybox mount -o remount,rw /
-$busybox echo "Executed on boot at $date" > /gt_test
+$busybox echo "Executed on boot at $date" > /gt_boot
 $busybox mount -o remount,ro /
 if [ -s /data/system/GT_profile ]; then
    PROFILE=$($busybox cat /data/system/GT_profile);
