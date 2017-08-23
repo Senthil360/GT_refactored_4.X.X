@@ -23,7 +23,7 @@ fi
 divider="======="
 busybox="/system/etc/GovTuner/busybox"
 getprop="/system/bin/getprop"
-ver="4.1"
+ver="4.2"
 id="$(id)"; id="${id#*=}"; id="${id%%\(*}"; id="${id%% *}"
 VER=$($busybox awk -F= '/ro.build.version.release/{print $NF}' /system/build.prop)
 DEVICE=$($getprop ro.product.model | $busybox grep '[a-zA-Z0-9]');
@@ -69,6 +69,35 @@ Bl='\e[01;30m'
 C='\e[01;36m'
 W='\e[01;37m'
 
+find_dir() {
+   if [ $tot_final -eq 1 ]; then
+      loc_final=$dir0
+   fi
+   if [ $tot_final -eq 2 ]; then
+      loc_final=$dir1
+   fi
+   if [ $tot_final -eq 3 ]; then
+      loc_final=$dir2
+   fi
+   if [ $tot_final -eq 4 ]; then
+      loc_final=$dir3
+   fi
+unset dir0; unset dir1; unset dir2; unset dir3;
+}
+   
+input_dir() {
+loc=$1
+if [ -e $loc ]; then
+   tot=$($busybox echo $loc | $busybox tr -cd '/' | $busybox wc -m)
+   tot_final=$((tot-4))
+   find_dir
+   for e in $loc_final; do $busybox echo $e >> /sdcard/GT_list; done
+   for f in $loc_final; do $busybox cat $f >> /sdcard/GT_list; done
+   unset e; unset f;
+fi
+unset loc; unset loc_final; unset tot; unset tot_final;
+}
+
 alt_det() {
 j=0
 if [ -e /sdcard/GT_list ]; then
@@ -78,16 +107,13 @@ cpu_dir="/sys/devices/system/cpu"
 cd /sys/devices/system/cpu
 req_file=("scaling_governor" "cpuinfo_max_freq" "cpuinfo_min_freq")
 while [ "$j" -lt "${#req_file[@]}" ]; do
+   dir0=$cpu_dir/${req_file[$j]}; dir1=$cpu_dir/*/${req_file[$j]}; dir2=$cpu_dir/*/*/${req_file[$j]}; dir3=$cpu_dir/*/*/*/${req_file[$j]};
    echo "$j and ${req_file[$j]}"
    $busybox echo "${req_file[$j]} - $DEVICE" >> /sdcard/GT_list
-   $busybox ls $cpu_dir/${req_file[$j]} 1>>/sdcard/GT_list 2>/dev/null
-   $busybox cat $($busybox ls $cpu_dir/${req_file[$j]} 2>/dev/null) 2>/dev/null 1>>/sdcard/GT_list
-   $busybox ls $cpu_dir/*/${req_file[$j]} 1>>/sdcard/GT_list 2>/dev/null
-   $busybox cat $($busybox ls $cpu_dir/*/${req_file[$j]} 2>/dev/null) 2>/dev/null 1>>/sdcard/GT_list
-   $busybox ls $cpu_dir/*/*/${req_file[$j]} 1>>/sdcard/GT_list 2>/dev/null
-   $busybox cat $($busybox ls $cpu_dir/*/*/${req_file[$j]} 2>/dev/null) 1>>/sdcard/GT_list 2>/dev/null
-   $busybox ls $cpu_dir/*/*/*/${req_file[$j]} 1>>/sdcard/GT_list 2>/dev/null
-   $busybox cat $($busybox ls $cpu_dir/*/*/*/${req_file[$j]} 2>/dev/null) 1>>/sdcard/GT_list 2>/dev/null
+   input_dir $cpu_dir/${req_file[$j]}
+   input_dir $cpu_dir/*/${req_file[$j]}
+   input_dir $cpu_dir/*/*/${req_file[$j]}
+   input_dir $cpu_dir/*/*/*/${req_file[$j]}
    $busybox echo " " >> /sdcard/GT_list
    $busybox echo "$div" >> /sdcard/GT_list
    $busybox echo " " >> /sdcard/GT_list
@@ -98,13 +124,13 @@ unset j; unset req_file;
 
 check_order() {
 a=1; b=2; d=1
-c=$(cat sorted.txt | tr -cd '%' | wc -m)
+c=$(cat /sdcard/sorted.txt | tr -cd '%' | wc -m)
 store[0]=0;
 while [ $a -lt $c ]; do
-  initial=$(cat sorted.txt | cut -d '-' -f$a | cut -d '%' -f2 | tr -d ' ')
-  final=$(cat sorted.txt | cut -d '-' -f$b | cut -d '%' -f2 | tr -d ' ')
+  initial=$(cat /sdcard/sorted.txt | cut -d '-' -f$a | cut -d '%' -f2 | tr -d ' ')
+  final=$(cat /sdcard/sorted.txt | cut -d '-' -f$b | cut -d '%' -f2 | tr -d ' ')
   if [ $initial -ne $final ]; then
-     store[$d]=$(cat sorted.txt | cut -d '-' -f$((b+1)) | cut -d '%' -f1 | tr -d ' ')
+     store[$d]=$(cat /sdcard/sorted.txt | cut -d '-' -f$((b+1)) | cut -d '%' -f1 | tr -d ' ')
      d=$((d+1))
   fi
   a=$((a+1))
@@ -487,7 +513,7 @@ while true; do
 	                for i in "${arr_gov[@]}"; do
 		            if [ "$i" = "zzmoove" ]; then
 		               if [ -f ${arr_path[$ab]}/${arr_gov[$ab]}/disable_hotplug ]; then
-			          HOTPLUG_FILE=${arr_path[$ab]}/${arr_gov[$ab]}/disable_hotplug)
+			          HOTPLUG_FILE=${arr_path[$ab]}/${arr_gov[$ab]}/disable_hotplug
 		                  $busybox echo "1" > $HOTPLUG_FILE
 		               fi
                             fi
@@ -504,7 +530,7 @@ while true; do
 	                for i in "${arr_gov[@]}"; do
 		            if [ "$i" = "zzmoove" ]; then
 		               if [ -f ${arr_path[$ab]}/${arr_gov[$ab]}/disable_hotplug ]; then
-			          HOTPLUG_FILE=${arr_path[$ab]}/${arr_gov[$ab]}/disable_hotplug)
+			          HOTPLUG_FILE=${arr_path[$ab]}/${arr_gov[$ab]}/disable_hotplug
 		                  $busybox echo "0" > $HOTPLUG_FILE
 		               fi
                             fi
