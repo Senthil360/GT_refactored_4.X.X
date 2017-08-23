@@ -189,93 +189,15 @@ while true; do
 		clear
 		echo "Current Interval: ${G}$(cat $INTERVAL)${N} secs"
 		echo $divider
-		echo " 1 - ${W}30 secs${N}"
-		echo " 2 - ${W}1 min / 60 secs${N}"
-		echo " 3 - ${W}2 mins / 120 secs${N}"
-		echo " 4 - ${W}3 mins / 180 secs${N}"
-		echo " 5 - Custom"
-		echo " 6 - ${R}Locked${N}"
-                echo " 7 - ${R}Disable_loop${N}"
-		echo " 0 - Back"
-		echo $divider
-		echo -n -e "[Choice]: "
-		read int
-		case $int in
-			1)
-				echo "Changing to 30 secs"
-				echo 30 > $INTERVAL
-				sleep 2
-				clear
-				return
-			;;
-			2)
-				echo "Changing to 1 min"
-				echo 60 > $INTERVAL
-				sleep 2
-				clear
-				return
-			;;
-			3)
-				echo "Changing to 2 mins"
-				echo 120 > $INTERVAL
-				sleep 2
-				clear
-				return
-			;;
-			4)
-				echo "Changing to 3 mins"
-				echo 180 > $INTERVAL
-				sleep 2
-				clear
-				return
-			;;
-			5)
-				clear
-				echo -n -e "Change to (in seconds): "
-				read cus
-				if [ "$cus" == "" ]; then
-					echo "Error"
-					sleep 1
-					return 1
-				fi
-				tmp=$(echo $cus | tr -d '0-9')
-				if [ $tmp ]; then
-					echo Error
-					sleep 1
-					return 1
-				else
-					echo "Changing to $cus"
-					echo $cus > $INTERVAL
-					sleep 2
-					clear
-					return
-				fi
-			;;
-			6)
-				echo "Locked loop"
-				echo 0 > $INTERVAL
-				sleep 2
-				clear
-				return
-			;;
-                        7)
-				echo "Disable loop execution"
-				echo NO > $INTERVAL
-                                rm -f $INTERVAL 2>/dev/null
-				sleep 2
-				clear
-				return
-			;;
-			0)
-				clear; return
-			;;
-			*)
-				echo "Invalid!"
-				sleep 1
-				clear
-				return 1
-			;;
-		esac
+                read -p "Enter value in seconds [ e to exit ] :" cus
+                if [ "$cus" = "e" ] || [ "$cus" = "E" ]; then
+                   return;
+                fi
+                if [ $cus -gt 0 ]; then
+                   $busybox echo "$cus"
+                else
+                   $busybox echo ""$cus" is not recognised as integer , enter NUMERICAL value"
+                fi 2>/dev/null
 	}
 	    
 	if [ -e "/sys/module/workqueue/parameters/power_efficient" ]; then
@@ -327,8 +249,7 @@ while true; do
 			$busybox echo "    Please type su first"
 			$busybox echo "    Then type govtuner"
 			$busybox echo ""
-			$busybox echo ""
-			$busybox sleep 1
+			$busybox sleep 2
 			exit 1
 		else
 			ROOT=1
