@@ -211,10 +211,10 @@ while true; do
 		   $busybox echo "Current Interval: ${G}$(cat $INTERVAL)${N} secs"
 		   $busybox echo $divider
                 else
-                   $busybox echo "Interval not set, please choose below"
+                   $busybox echo "Interval not set, please enter in seconds [ e to exit ]"
                    $busybox echo $divider
                 fi
-                read -p "Enter value in seconds [ e to exit ] :" cus
+                while read cus; do
                 if [ "$cus" = "e" ] || [ "$cus" = "E" ]; then
                    return;
                 fi
@@ -223,7 +223,8 @@ while true; do
                 else
                    $busybox echo ""$cus" is not recognised as integer , enter NUMERICAL value"
                 fi 2>/dev/null
-        unset cus;
+                unset cus;
+                done
 	}
 	#Terminal_output_Begins
 	if [ "$ROOT" -eq 0 ]; then
