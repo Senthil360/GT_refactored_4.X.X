@@ -100,9 +100,7 @@ unset loc; unset loc_final; unset tot; unset tot_final;
 
 alt_det() {
 j=0
-if [ -e /sdcard/GT_list ]; then
-   $buysbox rm -f /sdcard/GT_list 2>/dev/null
-fi
+rm /sdcard/GT_list 2>/dev/null
 cpu_dir="/sys/devices/system/cpu"
 cd /sys/devices/system/cpu
 req_file=("scaling_governor" "cpuinfo_max_freq" "cpuinfo_min_freq")
@@ -598,20 +596,25 @@ while true; do
 			$busybox clear;
 			$busybox echo "";
 			chmod 644 /sys/module/workqueue/parameters/power_efficient;
-			read -p "Enable or Disable - Y/n [e to exit]:"opt
+                        $busybox echo "Enable or Disable Y/N"
+			while read opt; do
                         if [ "$opt" = "e" ] || [ "$opt" = "E" ]; then
                            return;
                         fi
                         if [ "$opt" = "y" ] || [ "$opt" = "Y" ]; then
                            $busybox echo "Y" > /sys/module/workqueue/parameters/power_efficient;
+                           break
                         elif [ "$opt" = "n" ] || [ "$opt" = "N" ]; then
                            $busybox echo "N" > /sys/module/workqueue/parameters/power_efficient;
+                           break
                         else
                            $busybox echo "value $opt not recognised"
-                           return;
+                           break
                         fi 2>/dev/null
                         unset opt;
-                        return;
+                        break;
+                        $busybox clear;
+                        done
 		;;
 
 		w|W)

@@ -54,9 +54,7 @@ unset loc; unset loc_final; unset tot; unset tot_final;
 
 alt_det() {
 j=0
-if [ -e /sdcard/GT_list ]; then
-   $buysbox rm -f /sdcard/GT_list 2>/dev/null
-fi
+rm /sdcard/GT_list 2>/dev/null
 cpu_dir="/sys/devices/system/cpu"
 cd /sys/devices/system/cpu
 req_file=("scaling_governor" "cpuinfo_max_freq" "cpuinfo_min_freq")
