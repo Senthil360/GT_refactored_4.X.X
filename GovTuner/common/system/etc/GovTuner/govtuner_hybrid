@@ -394,4 +394,11 @@ if [ "$cluster_total" -eq 3 ]; then
 fi
 onboot_exec
 
+if [ -s /data/system/INTERVAL ]; then
+   exec_interval=$($busybox cat /data/system/INTERVAL)
+   $busybox sleep $exec_interval
+else
+   exit
+fi
+
 done
