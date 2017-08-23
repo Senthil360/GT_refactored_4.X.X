@@ -21,7 +21,6 @@ fi
 # =============
 
 divider="======="
-core="/system/etc/GovTuner"
 busybox="/system/etc/GovTuner/busybox"
 getprop="/system/bin/getprop"
 init="/system/etc/init.d"
@@ -187,28 +186,24 @@ while true; do
 
 	interval_choose() {
 		clear
-		echo "Current Interval: ${G}$(cat $INTERVAL)${N} secs"
-		echo $divider
+                if [ -e $INTERVAL ]; then
+		   $busybox echo "Current Interval: ${G}$(cat $INTERVAL)${N} secs"
+		   $busybox echo $divider
+                else
+                   $busybox echo "Interval not set, please choose below"
+                   $busybox echo $divider
+                fi
                 read -p "Enter value in seconds [ e to exit ] :" cus
                 if [ "$cus" = "e" ] || [ "$cus" = "E" ]; then
                    return;
                 fi
                 if [ $cus -gt 0 ]; then
-                   $busybox echo "$cus"
+                   $busybox echo "$cus" > $INTERVAL
                 else
                    $busybox echo ""$cus" is not recognised as integer , enter NUMERICAL value"
                 fi 2>/dev/null
+        unset cus;
 	}
-	    
-	if [ -e "/sys/module/workqueue/parameters/power_efficient" ]; then
-		if [ -e "/data/system/PE" ]; then
-			PE=$($busybox cat /data/system/PE);
-		else
-			PE=$($busybox cat /sys/module/workqueue/parameters/power_efficient)
-			$busybox echo "$PE" > "/data/system/PE";
-		fi
-	fi
-
 	#Terminal_output_Begins
 	if [ "$ROOT" -eq 0 ]; then
 			$busybox clear
@@ -414,38 +409,33 @@ while true; do
            IPER=$($busybox cat /data/system/IPER)
         else
            IPER=1
+           $busybox echo 1 > /data/system/IPER
         fi
-	if [ "$IPER" -eq 1 ]; then
-		$busybox echo -e "${R} i.${N} ${W}Increase performance${N} ${R}($IPER)${N}"
-	else
-		$busybox echo -e "${G} i.${N} ${W}Increase performance${N} ${G}($IPER)${N}"
-	fi
+
+        $busybox echo -e "${G} i.${N} ${W}Increase performance${N} ${Y}($IPER)${N}"
 	$busybox echo -e "${W} u. Disable GovTuner ${N}"
 	$busybox echo -e "${W} c. Changelog ${N}"
+       
+        #POWER_EFFICIENT
 	if [ -e "/sys/module/workqueue/parameters/power_efficient" ]; then
-		if [ "$PE" = "N" ]; then
-			$busybox echo -e "${R} p.${N} ${W}Power efficient ${N}"
-		elif [ "$PE" = "Y" ]; then
-			$busybox echo -e "${G} p.${N} ${W}Power efficient ${N}"
-		fi
+           PE=$($busybox cat /sys/module/workqueue/parameters/power_efficient)
+	   $busybox echo -e "${W} p.Power efficient (Yes/No : ${N}${Y}$PE${N})"
 	fi
+
 	$busybox echo -e "${W} w. Tweaked Parameters ${N}"
-	if [[ $(cat $INTERVAL 2>/dev/null) && $(cat $INTERVAL) -ne 0 ]]; then
-		INT_SEC=$(cat $INTERVAL)
-	elif [[ $(cat $INTERVAL 2>/dev/null) && $(cat $INTERVAL) -eq 0 ]]; then
-		INT_SEC=locked
-	else
-		INT_SEC=DISABLED
-	fi
-	if [[ $(cat $INTERVAL 2>/dev/null) && $(cat $INTERVAL) -ne 0 ]]; then
-		$busybox echo -e "${W} v. Change Execution Interval${N} ${G}($INT_SEC secs)${N}"
-	elif [[ $(cat $INTERVAL 2>/dev/null) && $(cat $INTERVAL) -eq 0 ]]; then
-		$busybox echo -e "${W} v. Change Execution Interval${N} ${R}($INT_SEC)${N}"
-	else
-		$busybox echo -e "${W} v. Change Execution Interval${N} ${R}($INT_SEC)${N}"
-	fi
+
+        #INTERVAL_CHOOSER
+	if [ -e $INTERVAL ]; then
+           INT_SEC=$($busybox cat $INTERVAL)
+           $busybox echo -e "${W} v. Change Execution Interval${N} ${G}($INT_SEC secs)${N}"
+        else
+           $busybox echo -e "${W} v. Change Execution Interval${N}"
+        fi
+
 	$busybox echo " e. Exit"
+
 	$busybox echo $divider
+        #ACTIVE/INACTIVE
 	if [ -s /data/system/GT_PID ]; then
 		sleep 0.2
 		OUTPUT_ID=$($busybox cat /data/system/GT_PID)
@@ -457,24 +447,13 @@ while true; do
 		fi
 	fi
 	$busybox echo ""
-	if [ -f /system/etc/init.d/00gt_init ]; then
-		Init="Init.d"; init=initd
-	elif [ -f /system/su.d/00gt_init ]; then
-		Init="Su.d"; init=sud
-	elif [ -f /system/etc/GovTuner/init/00gt_init ]; then
-		Init="Magisk"; init=magisk; INIT_TEST="/system/etc/GovTuner/init/gt_test"
-	else
-		Init="ERROR"
+        #RUN-ON-BOOT
+	if [ -e /gt_init ]; then
+           $busybox echo -e "${W}Run on-boot support${N}: ${G} Present ${N}"
+        else
+           $busybox echo -e "${W}Run on-boot support${N}: ${R} Not Available ${N}"
 	fi
-	if [ -f "$INIT_TEST" ]; then
-		echo -e "${W} $Init ${N} : ${G} WORKING ${N}"
-	else
-		echo -e "${W} $Init ${N} : ${R} NOT WORKING ${N}"
-		$busybox echo -e "${W} If you use 3rd party init.d emulators, as Kernel Adiutor init.d emulator, it's fine as well, it just won't show up here as active. ${N}"
-		if [ -d /data/data/eu.chainfire.supersu ] && [ -d /system/su.d ] && [ $(getprop ro.build.version.sdk) -ge 21 ] && [ "$init" != "sud" ]; then
-			echo " SuperSu's SU.D detected. Su.d is like Init.d but better. Import init scripts to /system/su.d? <type: sud> "
-		fi
-	fi
+
 	$busybox echo ""
 	$busybox echo -n "Please select a profile:"
 	read -r character
@@ -503,40 +482,38 @@ while true; do
 			sleep 2
 		;;
 
-                d|D)
-                       $busybox setsid /system/etc/GovTuner/profiles/GovTuner_hybrid 4 &
-                       $busybox clear;
-                       $busybox sleep 10
-                ;;
-
 		s|S)
 			$busybox clear;
 			$busybox echo "Enabling zzmoove hotplug"
 			sleep 2
-			d2=0
-			for i in "${sca_gov[@]}"; do
-				if [ "$i" = "zzmoove" ]; then
-				   if [ -f ${gov[$d2]}/disable_hotplug ]; then
-					$busybox echo 1 > ${gov[$d2]}/disable_hotplug
-				   fi
-				fi
-				d2=$(($d2+1))
-			done
+			ab=0
+	                for i in "${arr_gov[@]}"; do
+		            if [ "$i" = "zzmoove" ]; then
+		               if [ -f ${arr_path[$ab]}/${arr_gov[$ab]}/disable_hotplug ]; then
+			          HOTPLUG_FILE=${arr_path[$ab]}/${arr_gov[$ab]}/disable_hotplug)
+		                  $busybox echo "1" > $HOTPLUG_FILE
+		               fi
+                            fi
+		         ab=$((ab+1))
+	                done
+                        unset ab; unset i; unset HOTPLUG_FILE
 		;;
 
 		z|Z)
 			$busybox clear;
 			$busybox echo "Enabling zzmoove hotplug"
 			sleep 2
-			d1=0
-			for i in "${sca_gov[@]}"; do
-				if [ "$i" = "zzmoove" ]; then
-				   if [ -f ${gov[$d1]}/disable_hotplug ]; then
-				       $busybox echo 0 > ${gov[$d1]}/disable_hotplug
-				   fi
-                                fi
-				d1=$(($d1+1))
-			done
+			ab=0
+	                for i in "${arr_gov[@]}"; do
+		            if [ "$i" = "zzmoove" ]; then
+		               if [ -f ${arr_path[$ab]}/${arr_gov[$ab]}/disable_hotplug ]; then
+			          HOTPLUG_FILE=${arr_path[$ab]}/${arr_gov[$ab]}/disable_hotplug)
+		                  $busybox echo "0" > $HOTPLUG_FILE
+		               fi
+                            fi
+		         ab=$((ab+1))
+	                done
+                        unset ab; unset i; unset HOTPLUG_FILE
 		;;
 
 
@@ -550,13 +527,14 @@ while true; do
 			$busybox echo "1" > "/data/system/IPER"
                         $busubox echo "def" > /data/system/GT_profile
 			$busybox echo "Governor_Tuner Disabled"
+                        rm -f /data/system/INTERVAL
 			$busybox sleep 0.5
 			$busybox clear
 		;;
 
 		c|C)
 			$busybox clear;
-			sh "$core/change.sh"
+			sh "/system/etc/GovTuner/change.sh"
 		;;
                 
 		e|E)
@@ -596,43 +574,30 @@ while true; do
 		p|P)
 			$busybox clear;
 			$busybox echo "";
-			#Power efficient
 			chmod 644 /sys/module/workqueue/parameters/power_efficient;
-			$busybox echo -e "${W} y. Enable ${N}";
-			$busybox echo -e "${W} n. Disable  ${N}";
-			read -r p
-			case $p in
-				y|Y)
-					$busybox echo "Y" > /sys/module/workqueue/parameters/power_efficient;
-					power_efficient=$($busybox cat /sys/module/workqueue/parameters/power_efficient);
-					$busybox echo "power_efficient: $power_efficient";
-				;;
-				n|N)
-					$busybox echo "N" > /sys/module/workqueue/parameters/power_efficient;
-					power_efficient=$($busybox cat /sys/module/workqueue/parameters/power_efficient);
-					$busybox echo "power_efficient: $power_efficient";
-				;;
-				*)
-					$busybox clear;
-					$busybox echo "Invalid option, please try again";
-					$busybox sleep 1
-					exit
-				;;
-			esac
-			PE=$($busybox cat /sys/module/workqueue/parameters/power_efficient);
-			$busybox echo "$PE" > "/data/system/PE";
-			sleep 3
-			$busybox clear;
+			read -p "Enable or Disable - Y/n [e to exit]:"opt
+                        if [ "$opt" = "e" ] || [ "$opt" = "E" ]; then
+                           return;
+                        fi
+                        if [ "$opt" = "y" ] || [ "$opt" = "Y" ]; then
+                           $busybox echo "Y" > /sys/module/workqueue/parameters/power_efficient;
+                        elif [ "$opt" = "n" ] || [ "$opt" = "N" ]; then
+                           $busybox echo "N" > /sys/module/workqueue/parameters/power_efficient;
+                        else
+                           $busybox echo "value $opt not recognised"
+                           return;
+                        fi 2>/dev/null
+                        unset opt;
+                        return;
 		;;
 
 		w|W)
 			$busybox clear;
 			$busybox echo ""
 			if [ -e "/data/system/tweaked" ]; then
-				TWEAKED="/data/system/tweaked"
 				$busybox echo -e "${B} The following parameters are tweaked :- ${N}"
 				$busybox echo ""
-				$busybox cat $TWEAKED
+				$busybox cat /data/system/tweaked
 				$busybox echo $divider
 				$busybox echo "Press enter to go back"
 				read
@@ -643,27 +608,6 @@ while true; do
 			$busybox clear
 		;;
 
-		sud)
-			clear
-			if [ -d /system/su.d ]; then
-				echo "Transfering init scripts to /system/su.d ..."
-				sleep 0.4
-				if [ -f /system/etc/init.d/gt_atest ]; then
-					$busybox mv /system/etc/init.d/gt_atest /system/su.d
-					sleep 0.4
-				fi
-				if [ -f /system/etc/init.d/00gt_init ]; then
-					$busybox mv /system/etc/init.d/00gt_init /system/su.d
-					sleep 0.4
-				fi
-				chmod -R 700 /system/su.d;
-				echo "Reboot to see if Govtuner is active. If Govtuner applying on boot error still persists, contact the dev team."
-				sleep 3; clear
-			else
-				echo "Abort! No /system/su.d found!"
-				exit 1
-			fi
-		;;
 
 		v|V)
 			interval_choose
