@@ -12,6 +12,7 @@
 #  GNU General Public License for more details.
 #  You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #=#
+#TO-DO - Add log for little/big in govtuner_hybrid
 
 # = DEBUG =====
 # govtuner --verbose
@@ -212,10 +213,15 @@ while true; do
 		   $busybox echo $divider
                 else
                    $busybox echo "Interval not set, please enter in seconds [ e to exit ]"
+                   $busybox echo -e "${R}d.${N} - disable loop"
                    $busybox echo $divider
                 fi
                 while read cus; do
                 if [ "$cus" = "e" ] || [ "$cus" = "E" ]; then
+                   return;
+                fi
+                if [ "$cus" = "d" ] || [ "$cus" = "D" ]; then
+                   rm $INTERVAL
                    return;
                 fi
                 if [ $cus -gt 0 ]; then
@@ -463,9 +469,9 @@ while true; do
 		OUTPUT_ID=$($busybox cat /data/system/GT_PID)
 		if [ -d "/proc/$OUTPUT_ID" ]; then
 			sleep 0.2
-			echo -e "${W} GovTuner${N}: ${G} ACTIVE ${N} ${B}(PID=$OUTPUT_ID)${N}"
+			echo -e "${W} GovTuner-LOOP${N}: ${G} ACTIVE ${N} ${B}(PID=$OUTPUT_ID)${N}"
 		else
-			echo -e "${W} GovTuner${N}: ${R} INACTIVE ${N}"
+			echo -e "${W} GovTuner-LOOP${N}: ${R} INACTIVE ${N}"
 		fi
 	fi
 	$busybox echo ""
