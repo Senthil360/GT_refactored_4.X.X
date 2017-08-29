@@ -14,7 +14,7 @@
 #=======================================================================#
 busybox="/system/etc/GovTuner/busybox"
 changelog="/system/etc/GovTuner/changelog.txt"
-ver="4.1"
+ver="4.2-Beta"
 $busybox echo "CHANGELOG FOR $ver"
 $busybox echo "----------------------"
 cat $changelog

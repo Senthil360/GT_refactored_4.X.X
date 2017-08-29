@@ -1,10 +1,11 @@
 
-- Rewritten code from scratch
-- CPU detection algorithm updated
-- Code size reduced by 70%, increased efficiency and better loop controls
+- Major efficiency update on hybrid algorithm
+- On-boot-execution improved
+- Replaced main_detect with much efficient detection methods and functions to accurately assign values to the CPUs
+- Code size reduced by 30%, increased efficiency
+- Target_loads and above_hispeed_delay are checked and have been bound within frequency bandwidth of the SoC
+- Added conditional check in the end of hybrid script for looping
+- Interval_chooser modified : No more options , user can input thier choice for loop interval
 - Values revised for all devices and profiles
-- GovChanger removed (there are app alternatives)
-- Profile values arranged in tables for easier access and updates
-- Algorithm depended values such as target_loads added to hybrid script
 - Increased optimization and overall efficiency
-- Room for community involvement in future releases
+

@@ -24,7 +24,7 @@ fi
 divider="======="
 busybox="/system/etc/GovTuner/busybox"
 getprop="/system/bin/getprop"
-ver="4.2"
+ver="4.2-BETA_1"
 id="$(id)"; id="${id#*=}"; id="${id%%\(*}"; id="${id%% *}"
 VER=$($busybox awk -F= '/ro.build.version.release/{print $NF}' /system/build.prop)
 DEVICE=$($getprop ro.product.model | $busybox grep '[a-zA-Z0-9]');
