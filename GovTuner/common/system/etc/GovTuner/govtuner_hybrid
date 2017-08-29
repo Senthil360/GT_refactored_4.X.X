@@ -1,6 +1,7 @@
 #!/system/bin/sh
 #GovTuner 2017 Copyright - Debuffer and Senthil360
 #Hybrid Profile by Senthil360 (Recognized Developer @xda-developers.com)  <senthilmanikandan360@gmail.com>
+#TO-DO - Add log for little/big in govtuner_hybrid
 core_ctl=0
 option=$1
 tweaked="/data/system/tweaked"
@@ -174,11 +175,29 @@ reset_splarr() {
   unset TL_1; unset TL_2; unset TL_3; unset TL_4; unset TL_5; unset TL_6; unset TL_7; unset TL_8; unset TL_9; unset tuneArr1; unset tunerArr2; unset ta; unset t;
 }
 
+cluster_log() {
+  if [ $cluster_total -eq 2 ]; then
+     if [ $differ -eq ${cluster_diff[1]} ]; then
+        $busybox echo -e "${B} BIG CPU ${N}" >> $tweaked
+        unset differ;
+     fi
+  fi
+  if [ $cluster_total -eq 3 ]; then
+     if [ $differ -eq ${cluster_diff[1]} ]; then
+        $busybox echo -e "${B} Middle CPU ${N}" >> $tweaked
+        unset differ;
+     fi
+     if [ $differ -eq ${cluster_diff[2]} ]; then
+        $busybox echo -e "${B} BIG CPU ${N}" >> $tweaked
+        unset differ;
+     fi
+  fi
+}
+
 spl_tunables_battery() {
 $busybox echo -e "${B} Little/Regular CPU ${N}" > $tweaked
-t=0
+t=0; cl_log=0
 while [ "$t" -lt $cpu_no ]; do
-        $busybox echo "check apply 171"
         sleep 3
         #Target_Loads_Battery                
         TL_1=$((${arr_min[$t]} + ${CDF[$t]}))
@@ -192,6 +211,10 @@ while [ "$t" -lt $cpu_no ]; do
 	TL_9=$(($TL_8 + ${CDF[$t]}))
         tuneArr1=("go_hispeed_load" "hispeed_freq" "target_loads" "sampling_rate" "up_threshold" "down_differential")
         tuneArr2=("$(((${CDF[$t]} / 10000)  + 75))" "$((($IPER * ((($IPER-1) * ${CDF[$t]}) + ${arr_min[$t]}))))" "0 ${arr_min[$t]}:50 $TL_1:35 $TL_2:45 $TL_3:52 $TL_4:59 $TL_5:75 $TL_6:90 $TL_7:95 $TL_9:99" "$((73000 - (($IPER-1) * 7000)))" "$((100 - (($IPER*3) - ($IPER/2))))" "$((67 - (($IPER*2) - ($IPER/2))))")
+        if [ $cluster_total -gt 1 ]; then
+           find_diff "${arr_path[$t]}/cpuinfo_max_freq" "${arr_path[$t]}/cpuinfo_min_freq"
+           cluster_log
+        fi
         ta=0
         while [ $ta -lt "${#tuneArr2[@]}" ]; do
               if [ -e "${arr_path[$t]}/${arr_gov[$t]}/${tuneArr1[$ta]}" ]; then
@@ -223,6 +246,10 @@ while [ "$t" -lt $cpu_no ]; do
 	TL_9=$(($TL_8 + ${CDF[$t]}))
         tuneArr1=("go_hispeed_load" "hispeed_freq" "target_loads" "sampling_rate" "up_threshold" "down_differential")
         tuneArr2=("$(((${CDF[$t]} / 10000)  + 70))" "$((($IPER * ((($IPER-1) * ${CDF[$t0]}) + ${arr_min[$t]} + (${CDF[$t]} * 2)))))" "40 ${arr_min[$t]}:40 $TL_1:30 $TL_2:25 $TL_3:50 $TL_4:60 $TL_5:68 $TL_6:75 $TL_7:82 $TL_8:89" "$((63000 - (($IPER-1) * 7000)))" "$((85 - (($IPER*3) - ($IPER/2))))" "$((50 - (($IPER*2) - ($IPER/2))))")
+        if [ $cluster_total -gt 1 ]; then
+           find_diff "${arr_path[$t]}/cpuinfo_max_freq" "${arr_path[$t]}/cpuinfo_min_freq"
+           cluster_log
+        fi
         ta=0
         while [ $ta -lt ${#tuneArr2[@]} ]; do
               if [ -e "${arr_path[$t]}/${arr_gov[$t]}/${tuneArr1[$ta]}" ]; then
@@ -254,6 +281,10 @@ while [ "$t" -lt $cpu_no ]; do
 	TL_9=$(($TL_8 + ${CDF[$t]}))
         tuneArr1=("go_hispeed_load" "hispeed_freq" "target_loads" "sampling_rate" "up_threshold" "down_differential")
         tuneArr2=("$(((${CDF[$t]} / 10000)  + 70))" "$((($IPER * ((($IPER-1) * ${CDF[$t0]}) + ${arr_min[$t]} + (${CDF[$t]} * 4)))))" "60 ${arr_min[$t]}:50 $TL_1:25 $TL_2:35 $TL_3:45 $TL_4:60 $TL_5:65 $TL_6:73 $TL_7:90 $TL_8:93 $TL_9:85" "$((53000 - (($IPER-1) * 7000)))" "$((70 - (($IPER*3) - ($IPER/2))))" "$((30 - (($IPER*2) - ($IPER/2))))")
+        if [ $cluster_total -gt 1 ]; then
+           find_diff "${arr_path[$t]}/cpuinfo_max_freq" "${arr_path[$t]}/cpuinfo_min_freq"
+           cluster_log
+        fi
         ta=0
         while [ $ta -lt "${#tuneArr2[@]}" ]; do
               if [ -e "${arr_path[$t]}/${arr_gov[$t]}/${tuneArr1[$ta]}" ]; then
@@ -270,17 +301,27 @@ reset_splarr
 }                                                
 
 assign_selection() {
-  if [ $cluster_total -eq 2 ] && [ $v -eq 1 ]; then
-     unset selection;
-     selection="big"
+  if [ $cluster_total -eq 2 ]; then
+     if [ $differ -eq ${cluster_diff[1]} ]; then
+        unset selection;
+        unset differ;
+        selection=big
+        $busybox echo -e "${B} BIG CPU ${N}" >> $tweaked
+     fi
   fi
-  if [ $cluster_total -eq 3 ] && [ $v -eq 1 ]; then
-     unset selection;
-     selection="middle"
-  fi
-  if [ $cluster_total -eq 3 ] && [ $v -eq 2 ]; then
-     unset selection;
-     selection="big"
+  if [ $cluster_total -eq 3 ]; then
+     if [ $differ -eq ${cluster_diff[1]} ]; then
+        unset selection;
+        unset differ;
+        selection=middle
+        $busybox echo -e "${B} Middle CPU ${N}" >> $tweaked
+     fi
+     if [ $differ -eq ${cluster_diff[2]} ]; then
+        unset selection;
+        unset differ;
+        selection=big
+        $busybox echo -e "${B} BIG CPU ${N}" >> $tweaked
+     fi
   fi
 }
         
@@ -290,8 +331,10 @@ selection="little"
 $busybox echo " " >> $tweaked
          $busybox echo -e "${B}Tunables${N} ${R}$selection${N}" >> $tweaked
 while [ $u -lt ${#arr_gov[@]} ]; do
-      find_diff "${arr_path[$u]}/cpuinfo_max_freq" "${arr_path[$u]}/cpuinfo_min_freq"
-      if [ $differ -eq ${cluster_diff[$v]} ]; then
+       if [ $cluster_total -gt 1 ]; then
+           find_diff "${arr_path[$u]}/cpuinfo_max_freq" "${arr_path[$u]}/cpuinfo_min_freq"
+           assign_selection
+       fi
         q=0
         while [ $q -lt 158 ]; do
          q=$((q+1));
@@ -314,32 +357,7 @@ while [ $u -lt ${#arr_gov[@]} ]; do
          fi
         done
       unset differ;
-      fi
    u=$((u+1))
-   if [ $cluster_total -eq 2 ] && [ $v -eq 1 ]; then
-      break;
-   fi
-   if [ $cluster_total -eq 3 ] && [ $v -eq 2 ]; then
-      break;
-   fi
-   if [ $u -eq ${#arr_gov[@]} ]; then
-      if [ $cluster_total -gt 1 ] && [ $v -eq 0 ]; then
-         unset u; unset v;
-         u=0; v=1;
-         assign_selection
-         $busybox echo " " >> $tweaked
-         $busybox echo -e "${B}Tunables${N} ${R}$selection${N}" >> $tweaked
-         continue;
-      fi
-      if [ $cluster_total -eq 3 ] && [ $v -eq 1 ]; then
-         unset u; unset v;
-         u=0; v=2;
-         assign_selection
-         $busybox echo " " >> $tweaked
-         $busybox echo -e "${B}Tunables${N} ${R}$selection${N}" >> $tweaked
-         continue;
-      fi
-   fi
 done
 unset q; unset field_table_reg; unset w1; unset w2;
 reset_splarr
