@@ -12,7 +12,6 @@
 #  GNU General Public License for more details.
 #  You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #=#
-#TO-DO - Add log for little/big in govtuner_hybrid
 
 # = DEBUG =====
 # govtuner --verbose
@@ -107,7 +106,6 @@ cd /sys/devices/system/cpu
 req_file=("scaling_governor" "cpuinfo_max_freq" "cpuinfo_min_freq")
 while [ "$j" -lt "${#req_file[@]}" ]; do
    dir0=$cpu_dir/${req_file[$j]}; dir1=$cpu_dir/*/${req_file[$j]}; dir2=$cpu_dir/*/*/${req_file[$j]}; dir3=$cpu_dir/*/*/*/${req_file[$j]};
-   echo "$j and ${req_file[$j]}"
    $busybox echo "${req_file[$j]} - $DEVICE" >> /sdcard/GT_list
    input_dir $cpu_dir/${req_file[$j]}
    input_dir $cpu_dir/*/${req_file[$j]}
