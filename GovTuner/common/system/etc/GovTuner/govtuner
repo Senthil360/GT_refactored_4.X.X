@@ -23,7 +23,7 @@ fi
 divider="======="
 busybox="/system/etc/GovTuner/busybox"
 getprop="/system/bin/getprop"
-ver="4.2-BETA_1"
+ver="4.2-BETA_2"
 id="$(id)"; id="${id#*=}"; id="${id%%\(*}"; id="${id%% *}"
 VER=$($busybox awk -F= '/ro.build.version.release/{print $NF}' /system/build.prop)
 DEVICE=$($getprop ro.product.model | $busybox grep '[a-zA-Z0-9]');
@@ -469,18 +469,18 @@ while true; do
 		OUTPUT_ID=$($busybox cat /data/system/GT_PID)
 		if [ -d "/proc/$OUTPUT_ID" ]; then
 			sleep 0.2
-			echo -e "${W} GovTuner-LOOP${N}: ${G} ACTIVE ${N} ${B}(PID=$OUTPUT_ID)${N}"
+			echo -e "${W} Execution-LOOP${N}: ${G} ACTIVE ${N} ${B}(PID=$OUTPUT_ID)${N}"
 		else
-			echo -e "${W} GovTuner-LOOP${N}: ${R} INACTIVE ${N}"
+			echo -e "${W} Execution-LOOP${N}: ${R} INACTIVE ${N}"
 		fi
 	fi
 	$busybox echo ""
         #RUN-ON-BOOT
 	if [ -e /gt_boot ]; then
            $busybox echo -e "${W}Run on-boot support${N}: ${G} Present ${N}"
+           $busybox echo ""
 	fi
 
-	$busybox echo ""
 	$busybox echo -n "Please select a profile:"
 	read -r character
 	case $character in

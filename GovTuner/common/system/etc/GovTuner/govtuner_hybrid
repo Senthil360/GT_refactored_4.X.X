@@ -415,8 +415,12 @@ if [ "$cluster_total" -eq 3 ]; then
    spl_tunables_$profile
    apply_profile
 fi
-onboot_exec
 
+if [ -f /system/etc/init.d/00gt_init ] || [ -f /system/su.d/00gt_init ] || [ -f /gt_boot ]; then
+   $busybox echo "Boot script copied"
+else
+   onboot_exec
+fi
 if [ -s /data/system/INTERVAL ]; then
    exec_interval=$($busybox cat /data/system/INTERVAL)
    $busybox sleep $exec_interval
