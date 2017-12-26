@@ -1,6 +1,6 @@
 id=govtuner
 name=Gov-Tuner
-version=v4.1-Magisk
+version=#version
 versionCode=1
 author=Gov-Tuner Team
 description=Magisk implementation of Gov-Tuner
