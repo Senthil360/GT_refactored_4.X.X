@@ -1,0 +1,7 @@
+id=govtuner
+name=Gov-Tuner
+version=#version
+versionCode=1
+author=Gov-Tuner Team
+description=Magisk implementation of Gov-Tuner
+minMagisk=1500
