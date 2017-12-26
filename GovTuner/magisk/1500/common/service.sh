@@ -3,4 +3,4 @@
 # This will make your scripts compatible even if Magisk change its mount point in the future
 MODDIR=${0%/*}
 
-sh $MODDIR/system/etc/GovTuner/init/00gt_init magisk
+sh $MODDIR/system/etc/GovTuner/00gt_init magisk
