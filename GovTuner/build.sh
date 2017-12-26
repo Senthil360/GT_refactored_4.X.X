@@ -51,11 +51,15 @@ if [ "$build" = "magisk" ]; then
 	if [ ! -d "$dir/output/temp-magisk" ]; then
 		mkdir "$dir/output/temp-magisk"
 	fi
+	# Copy files needed for ZIP creation to a temporary folder
 	cp -R "$dir/magisk/1500/" "$dir/output/temp-magisk"
 	cp -R "$dir/common/system/" "$dir/output/temp-magisk/system"
+	mkdir "$dir/output/temp-magisk/system/bin"
 	mkdir -p "$dir/output/temp-magisk/system/etc/GovTuner/busybox-install"
+	# Copy Busybox and binaries-related stuff now
 	cp -R "$dir/arm" "$dir/output/temp-magisk/system/etc/GovTuner/busybox-install/"
 	cp -R "$dir/x86" "$dir/output/temp-magisk/system/etc/GovTuner/busybox-install/"
+	cp "$dir/common/system/etc/GovTuner/govtuner" "$dir/output/temp-magisk/system/bin/govtuner"
 	echo "Copying files"
     echo "Building output zip"
 	prev_dir="$dir"
