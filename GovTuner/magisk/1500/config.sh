@@ -25,6 +25,7 @@ REPLACE="
 
 set_permissions() {
   set_perm_recursive  $MODPATH  0  0  0755  0644
-  set_perm $MODPATH/system/bin/govtuner 0 0 0777 02000
-  set_perm $MODPATH/system/etc/GovTuner/00gt_init 0 0 0777 02000
+  set_perm_recursive  $MODPATH/system/etc/GovTuner/ 0 0 0755 0644
+  set_perm $MODPATH/system/bin/govtuner 0 0 0777
+  set_perm $MODPATH/system/etc/GovTuner/00gt_init 0 0 0777
 }
