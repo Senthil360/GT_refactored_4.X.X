@@ -61,6 +61,8 @@ if [ "$build" = "magisk" ]; then
 	cp -R "$dir/x86" "$dir/output/temp-magisk/system/etc/GovTuner/busybox-install/"
 	cp "$dir/common/system/etc/GovTuner/govtuner" "$dir/output/temp-magisk/system/bin/govtuner"
 	cp "$dir/common/system/etc/GovTuner/govtuner_hybrid" "$dir/output/temp-magisk/system/etc/GovTuner/profiles/govtuner_hybrid"
+	# Set the module's version number
+	sed -i "" -e "s/version=#version/version=v$version-Magisk/g" "$dir/output/temp-magisk/module.prop"
 	echo "Copying files"
     echo "Building output zip"
 	prev_dir="$dir"
