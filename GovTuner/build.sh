@@ -15,7 +15,7 @@
 # magisk-install : Build a Magisk-compatible zip then install
 #
 # Example:
-# ./build.sh 4.0.1
+# ./build.sh 4.0.1 bu
 
 version=$1
 build=$2
