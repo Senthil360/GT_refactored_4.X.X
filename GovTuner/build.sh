@@ -6,7 +6,7 @@
 # Works on Linux with proper "zip" installation
 #
 # Usage:
-# ./build.sh <ARGUMENTS> <VERSION>
+# ./build.sh <VERSION> <ARGUMENTS>
 #
 # Additional arguments:
 # build: Build a regular flashable zip
@@ -43,22 +43,46 @@ fi
 if [ "$build" = "b" ] || [ "$build" = "bu" ]; then
    echo "Using zip to build output"
    echo "Building output zip"
-   zip -r output/Gov-Tuner_$version.zip . -x ".git/*" "win/*" "uninstaller/*" "output/*" "magisk/*" "build.*" ".gitignore" "Gov-Tuner_*.zip">/dev/null
+   zip -r output/Gov-Tuner_$version.zip . -x ".git/*" "win/*" "uninstaller/*" "output/*" "magisk/*" "build.*" "Gov-Tuner_*.zip" "*/\.*">/dev/null
    echo "Output created: $dir/output/Gov-Tuner_$version.zip"
-   echo ""
 fi
 
-echo "Push file to sdcard? (Y/n) : "
-  read -r p
+if [ "$build" = "magisk" ]; then
+	if [ ! -d "$dir/output/temp-magisk" ]; then
+		mkdir "$dir/output/temp-magisk"
+	fi
+	cp -R "$dir/magisk/1500/" "$dir/output/temp-magisk"
+	cp -R "$dir/common/system/" "$dir/output/temp-magisk/system"
+	mkdir -p "$dir/output/temp-magisk/system/etc/GovTuner/busybox-install"
+	cp -R "$dir/arm" "$dir/output/temp-magisk/system/etc/GovTuner/busybox-install/"
+	cp -R "$dir/x86" "$dir/output/temp-magisk/system/etc/GovTuner/busybox-install/"
+	echo "Copying files"
+    echo "Building output zip"
+	prev_dir="$dir"
+	cd "$dir/output/temp-magisk"
+    zip -r ../Gov-Tuner_$version-Magisk.zip . -x "*/\.*">/dev/null
+	echo "Deleting temporary folder"
+	cd "$prev_dir"
+	rm -R "$dir/output/temp-magisk"
+    echo "Output created: $dir/output/Gov-Tuner_$version-Magisk.zip"
+fi
+
+if [ "$build" = "install" ] || [ "$build" = "magisk-install" ]; then
+printf "Push file to sdcard (Y/n)? "
+read -r p
   case $p in
 	y|Y)
           total=$(adb devices | grep "device" | wc -l)
           if [ "$total" -le 1 ]; then
-             echo "Device not found , check adb connection"
+             echo "Device not found, check adb connection!"
              exit
           fi
           if [ "$total" -gt 1 ]; then
-             adb push $dir/output/Gov-Tuner_$version.zip /sdcard/Gov-Tuner_$version.zip
+			 if [ "$build" = "magisk-install" ]; then
+             	 adb push $dir/output/Gov-Tuner_$version-Magisk.zip /sdcard/Gov-Tuner_$version-Magisk.zip
+			 else
+             	 adb push $dir/output/Gov-Tuner_$version.zip /sdcard/Gov-Tuner_$version.zip
+			 fi
              adb push $dir/output/file_copy_GT.sh $GT_out1/file_copy_GT.sh
              adb push $GT_in1/govtuner $GT_out1/govtuner
              adb push $GT_in1/govtuner_hybrid $GT_out1/GovTuner_hybrid
@@ -70,8 +94,8 @@ echo "Push file to sdcard? (Y/n) : "
              adb push $GT_in1/00gt_init $GT_out1/00gt_init
              sleep 0.5
              sleep 0.5
-             echo "Files copied to sdcard"
-               echo "Reboot recovery? (Y/n) : "
+             echo "Files copied to sdcard."
+               echo "Reboot recovery(Y/n)? "
                read -r q
                case $q in
                   y|Y)
@@ -100,3 +124,4 @@ echo "Push file to sdcard? (Y/n) : "
 	  exit
 	;;
   esac
+fi
