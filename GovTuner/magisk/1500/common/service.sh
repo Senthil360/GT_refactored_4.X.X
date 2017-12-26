@@ -3,5 +3,4 @@
 # This will make your scripts compatible even if Magisk change its mount point in the future
 MODDIR=${0%/*}
 
-# This script will be executed in late_start service mode
-# More info in the main Magisk thread
+sh $MODDIR/system/etc/GovTuner/init/00gt_init magisk
