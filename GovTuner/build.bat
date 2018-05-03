@@ -12,7 +12,7 @@ SetLocal EnableDelayedExpansion
 :: Usage:
 :: build <VERSION> <TYPE>
 ::
-:: Additional arguments:
+:: Build types:
 :: build: Build a regular flashable zip
 :: magisk : Build a Magisk-compatible zip
 :: install : Build a regular zip then install

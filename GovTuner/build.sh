@@ -1,14 +1,14 @@
 #!/bin/bash
 ## Gov-Tuner ZIP creation
-### Written by F4uzan, with the help of Gov-Tuner Team
+### Written by F4, with the help of Gov-Tuner Team
 #
 # This script should build a zip archive containing all the files excluding the ".git" folder
 # Works on Linux with proper "zip" installation
 #
 # Usage:
-# ./build.sh <VERSION> <ARGUMENTS>
+# ./build.sh <VERSION> <TYPE>
 #
-# Additional arguments:
+# Build types:
 # build: Build a regular flashable zip
 # magisk : Build a Magisk-compatible zip
 # install : Build a regular zip then install
