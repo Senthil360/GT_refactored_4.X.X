@@ -73,6 +73,7 @@ if [ "$build" = "magisk" ]; then
 	if [ ! -d "$dir/output/temp-magisk" ]; then
 		mkdir "$dir/output/temp-magisk"
 	fi
+	echo "Copying files"
 	# Copy files needed for ZIP creation to a temporary folder
 	if [ "$os" = "linux" ]; then
 		cp -r "$dir/magisk/1500/." "$dir/output/temp-magisk/"
@@ -96,7 +97,6 @@ if [ "$build" = "magisk" ]; then
 		sed -i "" -e "s/version=#version/version=v$version-Magisk/g" "$dir/output/temp-magisk/module.prop"
 		sed -i "" -e "s/#version/$version/g" "$dir/output/temp-magisk/config.sh"
 	fi
-	echo "Copying files"
     echo "Building output zip"
 	prev_dir="$dir"
 	cd "$dir/output/temp-magisk"
