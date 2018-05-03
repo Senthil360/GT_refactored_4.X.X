@@ -87,8 +87,10 @@ if [ "$build" = "magisk" ]; then
 	# Set the module's version number
 	if [ "$os" = "linux" ]; then
 		sed -i -e "s/version=#version/version=v$version-Magisk/g" "$dir/output/temp-magisk/module.prop"
+		sed -i -e "s/#version/$version/g" "$dir/output/temp-magisk/config.sh"
 	else
 		sed -i "" -e "s/version=#version/version=v$version-Magisk/g" "$dir/output/temp-magisk/module.prop"
+		sed -i "" -e "s/#version/$version/g" "$dir/output/temp-magisk/config.sh"
 	fi
 	echo "Copying files"
     echo "Building output zip"
