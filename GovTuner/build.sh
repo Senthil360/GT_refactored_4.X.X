@@ -25,6 +25,10 @@ GT_in2="$dir/common/system/etc/GovTuner/profiles"
 GT_out1="/sdcard/GT_dev"
 #GT_out2="/system/etc/GovTuner/profiles"
 
+command -v zip >/dev/null 2>&1 || {
+	echo "Unable to find zip. Please install zip before using the build script." >&2; exit 1;
+}
+
 # Check for OS. Mac and Linux has a different syntax for some of the commands used here.
 if [ "$(uname -s)" = "Darwin" ]; then
 	os="darwin"
