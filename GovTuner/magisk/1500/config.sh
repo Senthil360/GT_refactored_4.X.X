@@ -1,7 +1,7 @@
 MODID=govtuner
 AUTOMOUNT=true
 PROPFILE=false
-POSTFSDATA=true
+POSTFSDATA=false
 LATESTARTSERVICE=true
 
 print_modname() {
