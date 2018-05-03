@@ -84,8 +84,8 @@ if !build! EQU magisk (
 	:: Convert potentially non-Unix line endings.
 	for /f "tokens=* delims=" %%a in ('dir %home_dir%\output\temp-magisk /s /b') do ( %d2u_exec% %%a )
 	:: Copy busybox after line ending conversion to prevent it from being broken by dos2unix.
-	copy %home_dir%\arm %home_dir%\output\temp-magisk\system\etc\GovTuner\busybox-install>nul
-	copy %home_dir%\x86 %home_dir%\output\temp-magisk\system\etc\GovTuner\busybox-install>nul
+	copy %home_dir%\arm\busybox %home_dir%\output\temp-magisk\system\etc\GovTuner\busybox-install\arm\busybox>nul
+	copy %home_dir%\x86\busybox %home_dir%\output\temp-magisk\system\etc\GovTuner\busybox-install\x86\busybox>nul
 	:: Build output.
 	cd output\temp-magisk
 	echo Building output zip.
