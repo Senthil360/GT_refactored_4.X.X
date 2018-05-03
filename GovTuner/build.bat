@@ -83,7 +83,7 @@ if !build! EQU magisk (
 	:: Build output.
 	cd output\temp-magisk
 	echo Building output zip.
-	%zip_exec% -r ..\Gov-Tuner_%version%-Magisk.zip .>nul
+	%zip_exec% -0 -r ..\Gov-Tuner_%version%-Magisk.zip .>nul
 	pushd %prev_dir%
 	echo Deleting temporary folder
 	rd /s /q %home_dir%\output\temp-magisk>nul
