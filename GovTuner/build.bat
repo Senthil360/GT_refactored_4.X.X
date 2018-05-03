@@ -2,8 +2,10 @@
 SetLocal EnableDelayedExpansion
 :: Gov-Tuner ZIP creation script
 :: Written by F4, with the help of Gov-Tuner Team
-:: zip, bzip2, and sed binaries provided by GnuWin/gnuwin32 at http://gnuwin32.sourceforge.net
+:: zip, bzip2, and sed binary provided by GnuWin/gnuwin32 at http://gnuwin32.sourceforge.net
 ::
+:: dos2unix binary provided by the people at https://sourceforge.net/projects/dos2unix/
+
 :: This script should build a zip archive containing all the files excluding the ".git" folder.
 :: The needed binaries is provided in the "win" folder, this folder will also be excluded out when compiling the zip.
 ::
@@ -25,6 +27,7 @@ set home_dir=%cd%
 set prev_dir=%cd%
 set zip_exec=%home_dir%\win\zip.exe
 set sed_exec=%home_dir%\win\sed.exe
+set d2u_exec=%home_dir%\win\d2u.exe
 
 if !version! EQU "" (
 	echo No version number supplied, exiting.
@@ -67,19 +70,22 @@ if !build! EQU build (
 if !build! EQU magisk (
 	:: Use xcopy instead of robocopy for compatibility reason.
 	echo Copying files
-	xcopy %home_dir%\magisk\1500 %home_dir%\output\temp-magisk /E /V /F /H /N>nul
-	xcopy %home_dir%\common\system %home_dir%\output\temp-magisk\system /E /V /F /H /N>nul
+	xcopy %home_dir%\magisk\1500 %home_dir%\output\temp-magisk /E>nul
+	xcopy %home_dir%\common\system %home_dir%\output\temp-magisk\system /E>nul
 	mkdir %home_dir%\output\temp-magisk\system\bin
 	mkdir %home_dir%\output\temp-magisk\system\etc\GovTuner\busybox-install
 	mkdir %home_dir%\output\temp-magisk\system\etc\GovTuner\busybox-install\arm
 	mkdir %home_dir%\output\temp-magisk\system\etc\GovTuner\busybox-install\x86
-	copy %home_dir%\arm %home_dir%\output\temp-magisk\system\etc\GovTuner\busybox-install>nul
-	copy %home_dir%\x86 %home_dir%\output\temp-magisk\system\etc\GovTuner\busybox-install>nul
 	copy %home_dir%\common\system\etc\GovTuner\govtuner %home_dir%\output\temp-magisk\system\bin\govtuner>nul
 	copy %home_dir%\common\system\etc\GovTuner\govtuner_hybrid %home_dir%\output\temp-magisk\system\etc\GovTuner\profiles\govtuner_hybrid>nul
 	:: Set the module's version number.
 	%sed_exec% -i -e s/version=#version/version=v%version%-Magisk/g %home_dir%\output\temp-magisk\module.prop
 	%sed_exec% -i -e s/#version/%version%/g %home_dir%\output\temp-magisk\config.sh
+	:: Convert potentially non-Unix line endings.
+	for /f "tokens=* delims=" %%a in ('dir %home_dir%\output\temp-magisk /s /b') do ( %d2u_exec% %%a )
+	:: Copy busybox after line ending conversion to prevent it from being broken by dos2unix.
+	copy %home_dir%\arm %home_dir%\output\temp-magisk\system\etc\GovTuner\busybox-install>nul
+	copy %home_dir%\x86 %home_dir%\output\temp-magisk\system\etc\GovTuner\busybox-install>nul
 	:: Build output.
 	cd output\temp-magisk
 	echo Building output zip.
