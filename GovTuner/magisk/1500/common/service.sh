@@ -7,8 +7,8 @@ MODDIR=${0%/*}
 
 busybox="$MODDIR/system/etc/GovTuner/busybox"
 
-ABI=$(grep -m 1 "ro.product.cpu.abi=" "system/build.prop" | cut -d"=" -f2 | sed -e '1{q;}')"
-ABI2=$(grep -m 1 "ro.product.cpu.abi2=" "system/build.prop" | cut -d"=" -f2 | sed -e '1{q;}')"
+ABI=$(getprop "ro.product.cpu.abi")
+ABI2=$(getprop "ro.product.cpu.abi2")
 
 if [ "$ABI" = "arm64-v8a" ]; then
 	ARCH=arm
