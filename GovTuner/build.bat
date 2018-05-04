@@ -78,6 +78,9 @@ if !build! EQU magisk (
 	mkdir %home_dir%\output\temp-magisk\system\etc\GovTuner\busybox-install\x86
 	copy %home_dir%\common\system\etc\GovTuner\govtuner %home_dir%\output\temp-magisk\system\bin\govtuner>nul
 	copy %home_dir%\common\system\etc\GovTuner\govtuner_hybrid %home_dir%\output\temp-magisk\system\etc\GovTuner\profiles\GovTuner_hybrid>nul
+	:: TODO: Unbreak this.
+	set expect_file="GovTuner_hybrid"
+	ren "%home_dir\output\temp-magisk\system\etc\GovTuner\profiles\govtuner_hybrid" %home_dir%\output\temp-magisk\system\etc\GovTuner\profiles\!expect_file!
 	:: Set the module's version number.
 	%sed_exec% -i -e s/version=#version/version=v%version%-Magisk/g %home_dir%\output\temp-magisk\module.prop
 	%sed_exec% -i -e s/#version/%version%/g %home_dir%\output\temp-magisk\config.sh
