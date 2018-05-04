@@ -6,10 +6,8 @@ LATESTARTSERVICE=true
 
 print_modname() {
   ui_print "****************************************"
-  ui_print "Gov-Tuner v#version"
+  ui_print "Gov-Tuner v#version - Systemless for Magisk"
   ui_print "****************************************"
-  ui_print ""
-  ui_print "Systemless for Magisk, v0.2.1"
   ui_print ""
   ui_print "@Debuffer"
   ui_print "@Senthil360"
@@ -18,6 +16,7 @@ print_modname() {
   ui_print "@veez21"
   ui_print "@F4"
   ui_print "@GreekDragon"
+  ui_print ""
 }
 
 REPLACE="
