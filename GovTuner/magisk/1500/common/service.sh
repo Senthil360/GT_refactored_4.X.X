@@ -3,4 +3,35 @@
 # This will make your scripts compatible even if Magisk change its mount point in the future
 MODDIR=${0%/*}
 
+# Symlink our own Busybox
+
+busybox="$MODDIR/system/etc/GovTuner/busybox"
+
+ABI=$(getprop "ro.product.cpu.abi")
+ABI2=$(getprop "ro.product.cpu.abi2")
+
+if [ "$ABI" = "arm64-v8a" ]; then
+	ARCH=arm
+elif [ "$ABI" = "arm64-v8a" ]; then
+	ARCH=arm
+elif [ "$ABI" = "armeabi-v7a" ]; then
+	ARCH=arm
+elif [ "$ABI" = "armeabi-v7a" ]; then
+	ARCH=arm
+elif [ "$ABI" = "x86" ]; then
+	ARCH=x86
+elif [ "$ABI2" = "x86" ]; then
+	ARCH=x86
+elif [ "$ABI" = "x86_64" ]; then
+	ARCH=x86
+else
+  ARCH=arm
+fi
+
+if [ ! -e $busybox ]; then
+	ln -s $MODDIR/system/etc/GovTuner/busybox-install/$ARCH/busybox $busybox
+	chmod 777 $busybox
+	chown 0.2000 $busybox
+fi
+
 sh $MODDIR/system/etc/GovTuner/00gt_init magisk

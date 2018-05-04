@@ -33,19 +33,20 @@ Visit [the official thread in XDA](http://forum.xda-developers.com/android/softw
 - ... And more to come !
 
 ## Building Gov-Tuner
-Gov-Tuner provides necessary buildscript to compile together a working flashable zip and an uninstaller zip. The script should work with Windows, Mac, and general Linux distributions. Both Mac and Linux needs to install "zip" first since Gov-Tuner does not supply the prebuilt binary.
+Gov-Tuner provides necessary build script to compile together a working flashable zip, and an uninstaller zip. The script should work with Windows, Mac, and general Linux distribution. Both Mac and Linux needs to install "zip" first since Gov-Tuner does not supply the prebuilt binary.
 
 To build, make sure you're in the Gov-Tuner source folder. Type the following command to build:
 
 ##### Linux and Mac
 
-	"./build.sh VERSION b" for GovTuner zip only
-	"./build.sh VERSION bu" for GovTuner zip and uninstaller zip
+	./build.sh VERSION TYPE
 
 ##### Windows
 
-	build VERSION
+	build VERSION TYPE
 
-Where VERSION is the version intended to be built.
+Where:
+- VERSION: the version intended to be built.
+- TYPE: the build type; this can be "magisk" or "build".
 
 The output file location will be shown once the build is complete.
